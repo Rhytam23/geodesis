@@ -31,7 +31,7 @@ export default function MissionControl() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Live Status */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-md transition-all">
+        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-8">
             <div>
               <div className="font-semibold">Live Operations Status</div>
