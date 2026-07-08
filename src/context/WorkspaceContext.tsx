@@ -15,6 +15,9 @@ interface WorkspaceContextValue {
   setPanelMode: (mode: WorkspaceState['activePanelMode']) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setSelectedLocation: (loc: WorkspaceState['selectedLocation']) => void;
+  setSimulationResults: (res: WorkspaceState['simulationResults']) => void;
+  setSimulationRunning: (running: boolean) => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | undefined>(undefined);
@@ -33,6 +36,12 @@ function workspaceReducer(state: WorkspaceState, action: WorkspaceAction): Works
       return { ...state, isLoading: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+    case 'SET_LOCATION':
+      return { ...state, selectedLocation: action.payload };
+    case 'SET_SIMULATION_RESULTS':
+      return { ...state, simulationResults: action.payload };
+    case 'SET_SIMULATION_RUNNING':
+      return { ...state, isSimulationRunning: action.payload };
     default:
       return state;
   }
@@ -54,6 +63,9 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     setPanelMode: (mode) => dispatch({ type: 'SET_PANEL_MODE', payload: mode }),
     setLoading: (loading) => dispatch({ type: 'SET_LOADING', payload: loading }),
     setError: (error) => dispatch({ type: 'SET_ERROR', payload: error }),
+    setSelectedLocation: (loc) => dispatch({ type: 'SET_LOCATION', payload: loc }),
+    setSimulationResults: (res) => dispatch({ type: 'SET_SIMULATION_RESULTS', payload: res }),
+    setSimulationRunning: (running) => dispatch({ type: 'SET_SIMULATION_RUNNING', payload: running }),
   };
 
   return (

@@ -12,7 +12,7 @@
  * Every UI component should consume from here.
  */
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useTimeline } from '../context/TimelineContext';
 import { useScenario } from '../context/ScenarioContext';
@@ -113,12 +113,14 @@ export const useGeodesisTwin = (): GeodesisTwinAPI => {
 
   const currentYear = timelineCtx.state.selectedYear;
 
-  // Location state
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; meta?: any } | null>(null);
+  // Location and simulation state lifted to shared WorkspaceContext
+  const selectedLocation = workspace.state.selectedLocation;
+  const simulationResults = workspace.state.simulationResults;
+  const isSimulationRunning = workspace.state.isSimulationRunning;
 
-  // Simulation results state (keyed by year)
-  const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
-  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
+  const setSelectedLocation = workspace.setSelectedLocation;
+  const setSimulationResults = workspace.setSimulationResults;
+  const setIsSimulationRunning = workspace.setSimulationRunning;
 
   // Location bias (0 = neutral, positive = worse baseline, negative = better)
   const locationBias = useMemo(() => {
@@ -199,7 +201,7 @@ export const useGeodesisTwin = (): GeodesisTwinAPI => {
     setSelectedLocation(loc);
     // Reset simulation when changing location (new region = new baseline)
     setSimulationResults(null);
-  }, []);
+  }, [setSelectedLocation, setSimulationResults]);
 
   const toggleTimelinePlay = () => {
     timelineCtx.togglePlay();

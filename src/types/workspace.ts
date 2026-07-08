@@ -18,6 +18,9 @@ export interface WorkspaceState {
   activePanelMode: PanelMode;
   isLoading: boolean;
   error: string | null;
+  selectedLocation: { lat: number; lng: number; meta?: any } | null;
+  simulationResults: Record<number, { yield: number; profit: number; waterUse: number; riskScore: number }> | null;
+  isSimulationRunning: boolean;
 }
 
 export interface TimelineState {
@@ -57,14 +60,16 @@ export interface UIState {
   };
 }
 
-// Action types for reducers (optional but clean)
 export type WorkspaceAction =
   | { type: 'SET_TAB'; payload: 'workspace' | 'settings' }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'TOGGLE_RIGHT_PANEL' }
   | { type: 'SET_PANEL_MODE'; payload: PanelMode }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null };
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_LOCATION'; payload: { lat: number; lng: number; meta?: any } | null }
+  | { type: 'SET_SIMULATION_RESULTS'; payload: any | null }
+  | { type: 'SET_SIMULATION_RUNNING'; payload: boolean };
 
 export type TimelineAction =
   | { type: 'SET_YEAR'; payload: Year }
@@ -93,6 +98,9 @@ export const DEFAULT_WORKSPACE_STATE: WorkspaceState = {
   activePanelMode: 'current',
   isLoading: false,
   error: null,
+  selectedLocation: null,
+  simulationResults: null,
+  isSimulationRunning: false,
 };
 
 export const DEFAULT_TIMELINE_STATE: TimelineState = {
