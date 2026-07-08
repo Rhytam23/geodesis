@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+  title: MEKONG SMART LAND SYSTEM API
+  version: 1.0.0
+  description: Production-ready REST API for the Climate Decision Intelligence Platform (planned for v1.1)
+  contact:
+    name: Mekong Smart Land Team
+
+servers:
+  - url: https://api.mekong-smart-land.vn/v1
+    description: Production
+
+paths:
+  /weather:
+    get:
+      summary: Get weather for location
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Weather data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+
+  /soil:
+    get:
+      summary: Get soil data
+      parameters:
+        - name: lat
+          in: query
+          required: true
+        - name: lng
+          in: query
+          required: true
+      responses:
+        '200':
+          description: Soil data
+
+  /recommendations:
+    post:
+      summary: Generate crop recommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+      responses:
+        '200':
+          description: Ranked recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CropRecommendation'
+
+  /economic/compare:
+    post:
+      summary: Economic comparison current vs recommended
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EconomicRequest'
+      responses:
+        '200':
+          description: Full economic model
+
+components:
+  schemas:
+    DecisionInput:
+      type: object
+      properties:
+        lat: { type: number }
+        lng: { type: number }
+        currentCrop: { type: string }
+
+    CropRecommendation:
+      type: object
+      properties:
+        crop: { type: string }
+        confidence: { type: integer }
+        expectedYield: { type: number }
+        expectedProfit: { type: number }
+        lastUpdated: { type: string }
+        uncertainty: { type: number }
+        # + full explainability fields
+
+    WeatherResponse:
+      type: object
+      properties:
+        source: { type: string }
+        lastUpdated: { type: string }
+        confidence: { type: integer }
+        current:
+          type: object
+          properties:
+            temp: { type: number }
+            rainfall: { type: number }
+
+    EconomicRequest:
+      type: object
+      properties:
+        lat: { type: number }
+        lng: { type: number }
+        currentCrop: { type: string }
+        recommendedCrop: { type: string }
+```
+
+**Note**: This is the planned contract. v1.0 uses direct client services that match these shapes.

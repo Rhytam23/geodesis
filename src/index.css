@@ -1,0 +1,162 @@
+/* ============================================
+   GEODESIS DESIGN TOKENS
+   Single source of truth — MUST be first
+   ============================================ */
+@import './styles/design-tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Legacy aliases (preserve for existing components) */
+  --primary: #14532D;
+  --secondary: #22C55E;
+  --accent: #3B82F6;
+  --warning: #F59E0B;
+  --danger: #DC2626;
+  
+  /* Map to new design tokens for backward compatibility */
+  --geodesis-primary: #14532D;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.font-plex {
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+/* Enterprise UI Components */
+.card {
+  @apply bg-white rounded-2xl shadow-card border border-slate-200/60;
+}
+
+.card-elevated {
+  @apply bg-white rounded-2xl shadow-elevated border border-slate-200/70;
+}
+
+.section-header {
+  @apply text-2xl font-semibold tracking-tight text-slate-900;
+}
+
+.subtle-text {
+  @apply text-slate-500 text-sm;
+}
+
+.status-dot {
+  @apply w-2 h-2 rounded-full inline-block;
+}
+
+.status-dot.online { @apply bg-emerald-500; }
+.status-dot.processing { @apply bg-amber-500 animate-pulse; }
+.status-dot.alert { @apply bg-red-500; }
+
+.nav-link {
+  @apply px-4 py-2 text-sm font-medium rounded-xl transition-all hover:bg-slate-100;
+}
+
+.nav-link.active {
+  @apply bg-slate-900 text-white hover:bg-slate-800;
+}
+
+.map-container {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+}
+
+.leaflet-container {
+  background: #F1F5F9;
+}
+
+.layer-control {
+  @apply bg-white/95 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-sm p-3 text-sm;
+}
+
+.metric-value {
+  @apply text-3xl font-semibold text-slate-900 tracking-tighter;
+}
+
+.pipeline-step {
+  @apply flex items-center gap-3 p-4 rounded-2xl transition-all border border-slate-200;
+}
+
+.pipeline-step.active {
+  @apply border-emerald-200 bg-emerald-50/60;
+}
+
+.pipeline-step.completed {
+  @apply border-emerald-300 bg-emerald-50;
+}
+
+.data-source {
+  @apply flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl text-xs font-medium border border-slate-200;
+}
+
+.recommendation-card {
+  @apply bg-white border border-slate-200 rounded-2xl p-5 transition-all hover:border-emerald-200 hover:shadow-sm;
+}
+
+.explainable-row {
+  @apply flex items-start justify-between gap-3 py-2.5 border-b border-slate-100 last:border-none;
+}
+
+.role-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase;
+}
+
+.role-badge.farmer { @apply bg-emerald-100 text-emerald-700; }
+.role-badge.cooperative { @apply bg-blue-100 text-blue-700; }
+.role-badge.government { @apply bg-violet-100 text-violet-700; }
+.role-badge.researcher { @apply bg-amber-100 text-amber-700; }
+
+.timeline-slider {
+  @apply accent-emerald-600;
+}
+
+.satellite-layer {
+  transition: opacity 200ms ease;
+}
+
+/* Leaflet custom */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.leaflet-control-layers {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* Professional tables */
+.data-table th {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wider;
+}
+
+.data-table td {
+  @apply text-sm text-slate-700;
+}
+
+/* Leaflet overrides for professional look */
+.leaflet-popup-content {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+}
+
+/* Digital twin / simulator styles */
+.simulator-slider {
+  accent-color: #14532D;
+}
