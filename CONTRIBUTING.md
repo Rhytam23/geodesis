@@ -29,7 +29,7 @@ By participating you agree to abide by our [Code of Conduct](./CODE_OF_CONDUCT.m
 
 ### Reporting Bugs
 
-1. Search [existing issues](https://github.com/your-org/geodesis/issues) first.
+1. Search [existing issues](https://github.com/Rhytam23/geodesis/issues) first.
 2. Use the **Bug Report** template when opening a new issue.
 3. Include: steps to reproduce, expected vs actual behaviour, browser, OS, and whether Demo Mode was active.
 
@@ -69,7 +69,7 @@ If you find an incorrect crop recommendation, economic calculation, or agronomic
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-org/geodesis.git
+git clone https://github.com/Rhytam23/geodesis.git
 cd geodesis
 
 # 2. Install
@@ -179,7 +179,7 @@ perf(map): lazy-load GovernmentDashboard component
 
 ## Questions?
 
-Open an issue or start a [GitHub Discussion](https://github.com/your-org/geodesis/discussions).
+Open an issue or start a [GitHub Discussion](https://github.com/Rhytam23/geodesis/discussions).
 
 Thank you for helping Vietnamese farmers adapt to climate change. 🌾
 

@@ -76,3 +76,4 @@ private/
 # ----- Misc -----
 *.local
 .history/
+ruleset.json

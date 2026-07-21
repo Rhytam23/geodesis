@@ -2,7 +2,7 @@
 
 > **Geospatial Digital Twin for Climate-Resilient Agriculture**
 
-[![CI](https://github.com/your-org/geodesis/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/geodesis/actions/workflows/ci.yml)
+[![CI](https://github.com/Rhytam23/geodesis/actions/workflows/ci.yml/badge.svg)](https://github.com/Rhytam23/geodesis/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18-blue.svg)](https://react.dev)
@@ -37,7 +37,7 @@ Geodesis is a **map-first, AI-powered geospatial digital twin** for the Vietname
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-org/geodesis.git
+git clone https://github.com/Rhytam23/geodesis.git
 cd geodesis
 
 # 2. Install

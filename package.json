@@ -5,13 +5,13 @@
   "private": true,
   "type": "module",
   "license": "MIT",
-  "homepage": "https://github.com/your-org/geodesis",
+  "homepage": "https://github.com/Rhytam23/geodesis",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/geodesis.git"
+    "url": "https://github.com/Rhytam23/geodesis.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/geodesis/issues"
+    "url": "https://github.com/Rhytam23/geodesis/issues"
   },
   "engines": {
     "node": ">=20.0.0",

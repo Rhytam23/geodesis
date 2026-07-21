@@ -1,10 +1,10 @@
 # Global codeowners for Geodesis
-* @your-org/core-maintainers
+* @Rhytam23
 
 # Core decision engine & GIS integrations
-/src/services/decisionEngine.ts @your-org/data-science
-/src/integrations/ @your-org/gis-team
+/src/services/decisionEngine.ts @Rhytam23
+/src/integrations/ @Rhytam23
 
 # Open-source community files
-/.github/ @your-org/core-maintainers
-/docs/ @your-org/docs-team
+/.github/ @Rhytam23
+/docs/ @Rhytam23
