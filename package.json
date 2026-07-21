@@ -31,7 +31,6 @@
     "ci": "npm run typecheck && npm run lint && npm test && npm run build"
   },
   "dependencies": {
-    "date-fns": "^3.6.0",
     "framer-motion": "^11.3.30",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.436.0",
