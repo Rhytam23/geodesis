@@ -62,7 +62,7 @@ export async function getWeather(lat: number, lng: number): Promise<WeatherData>
     return cached.data;
   }
 
-  const apiKey = import.meta.env.VITE_WEATHER_API_KEY || 'f1263edf3983b5e0b6d6ab68f13350bd';
+  const apiKey = import.meta.env.VITE_WEATHER_API_KEY || '';
 
   if (apiKey) {
     try {

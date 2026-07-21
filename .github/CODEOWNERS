@@ -1,0 +1,10 @@
+# Global codeowners for Geodesis
+* @your-org/core-maintainers
+
+# Core decision engine & GIS integrations
+/src/services/decisionEngine.ts @your-org/data-science
+/src/integrations/ @your-org/gis-team
+
+# Open-source community files
+/.github/ @your-org/core-maintainers
+/docs/ @your-org/docs-team

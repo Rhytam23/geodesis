@@ -230,9 +230,6 @@ See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed instructions.
 | [docs/DEVELOPER_GUIDE.md](./docs/DEVELOPER_GUIDE.md) | Developer onboarding and patterns |
 | [docs/USER_GUIDE.md](./docs/USER_GUIDE.md) | End-user guide by role |
 | [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) | Vercel, Docker, static deployment |
-| [docs/API.md](./docs/API.md) | OpenAPI contract (v1.1 planned) |
-| [docs/GIS.md](./docs/GIS.md) | GIS map architecture |
-| [docs/AI_ENGINE.md](./docs/AI_ENGINE.md) | Decision engine methodology |
 | [docs/ROADMAP.md](./docs/ROADMAP.md) | Feature roadmap |
 | [api/openapi.yaml](./api/openapi.yaml) | Machine-readable OpenAPI spec |
 
