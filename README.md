@@ -290,3 +290,27 @@ See [SECURITY.md](./SECURITY.md) to report vulnerabilities responsibly.
 *Satellite intelligence. Transparent reasoning. Instant understanding.*
 
 > **Note**: This repository contains only production code and public documentation. Internal engineering artifacts, sprint plans, and AI workflow guides are in the private master repository (never committed here).
+
+---
+
+## 📖 Project Understanding (Future Reference)
+
+A map-first geospatial digital twin for climate-resilient agriculture in the Mekong Delta: an
+interactive Leaflet map with a 2026–2050 timeline scrubber, a 5-factor explainable scoring
+engine (weather/soil/market/satellite/history), economic modelling (ROI, payback, subsidy
+eligibility), and role-specific dashboards. Its own README already lists "Hackathon
+demonstrations & portfolio showcase" as an intended audience, alongside farmers, government
+analysts and researchers.
+
+**Stack:** React 18 + TypeScript + Vite + Leaflet, MIT licensed, CI on GitHub Actions.
+**Status:** polished hackathon/portfolio project — confirmed by its own README, complete with
+demo mode and CI badge.
+
+## 🎯 Where This Can Be Used
+
+- Climate-tech / agri-tech hackathon or portfolio showcase — this is explicitly what it was
+  built for.
+- Reference for building an explainable, source-and-confidence-annotated scoring engine over
+  live geospatial data.
+- **Hackathons:** yes, by design. The 5 deterministic demo scenarios and role dashboards are
+  ready for a live pitch with no setup risk.
