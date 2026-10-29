@@ -8,6 +8,7 @@
  */
 
 :root {
+  color-scheme: light;
   /* ============================================
      BRAND COLORS (exact from spec)
   ============================================ */
@@ -207,14 +208,17 @@
   --timeline-height: 92px;
 }
 
-/* Dark mode tokens (future-ready, not activated in v1) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --geodesis-background: #0F172A;
-    --geodesis-surface: #1E2937;
-    --geodesis-text-primary: #F8FAFC;
-    --geodesis-text-secondary: #CBD5E1;
-    --geodesis-border: #334155;
-    --geodesis-border-light: #1E2937;
-  }
+/*
+ * Dark mode tokens (future-ready, opt-in only).
+ * v1 surfaces are hard-coded light, so these must NOT follow the OS preference:
+ * doing so rendered near-white text on white panels for visitors in dark mode.
+ * Activate explicitly with <html data-theme="dark"> once the surfaces are themed.
+ */
+:root[data-theme='dark'] {
+  --geodesis-background: #0F172A;
+  --geodesis-surface: #1E2937;
+  --geodesis-text-primary: #F8FAFC;
+  --geodesis-text-secondary: #CBD5E1;
+  --geodesis-border: #334155;
+  --geodesis-border-light: #1E2937;
 }
