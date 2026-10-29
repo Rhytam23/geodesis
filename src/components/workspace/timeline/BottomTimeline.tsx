@@ -15,6 +15,22 @@ export const BottomTimeline: React.FC = () => {
 
   const progress = ((years.indexOf(currentYear) / (years.length - 1)) * 100);
 
+  // Live scrubbing: the year follows the pointer while it is held down on the track.
+  const trackRef = React.useRef<HTMLDivElement>(null);
+  const draggingRef = React.useRef(false);
+
+  const yearAt = (clientX: number) => {
+    const rect = trackRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return currentYear;
+    const percent = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    return years[Math.round(percent * (years.length - 1))];
+  };
+
+  const stepYear = (delta: number) => {
+    const i = years.indexOf(currentYear);
+    selectYear(years[Math.max(0, Math.min(years.length - 1, i + delta))]);
+  };
+
   return (
     <div className="h-full w-full px-4 flex items-center bg-white border-t border-[var(--geodesis-border)]">
       <div className="flex items-center gap-3 w-full">
@@ -49,21 +65,44 @@ export const BottomTimeline: React.FC = () => {
           </div>
 
           {/* Visual track with live progress */}
-          <div className="relative h-2.5 bg-[var(--timeline-track-bg)] rounded-full mx-1 cursor-pointer"
-               onClick={(e) => {
-                 const rect = e.currentTarget.getBoundingClientRect();
-                 const percent = (e.clientX - rect.left) / rect.width;
-                 const idx = Math.round(percent * (years.length - 1));
-                 const targetYear = years[Math.max(0, Math.min(years.length - 1, idx))];
-                 selectYear(targetYear);
-               }}>
+          <div
+            ref={trackRef}
+            role="slider"
+            tabIndex={0}
+            aria-label="Timeline year"
+            aria-valuemin={years[0]}
+            aria-valuemax={years[years.length - 1]}
+            aria-valuenow={currentYear}
+            className="relative h-2.5 bg-[var(--timeline-track-bg)] rounded-full mx-1 cursor-pointer touch-none select-none"
+            onPointerDown={(e) => {
+              draggingRef.current = true;
+              e.currentTarget.setPointerCapture(e.pointerId);
+              selectYear(yearAt(e.clientX));
+            }}
+            onPointerMove={(e) => {
+              if (draggingRef.current) selectYear(yearAt(e.clientX));
+            }}
+            onPointerUp={(e) => {
+              draggingRef.current = false;
+              if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+            }}
+            onPointerCancel={() => {
+              draggingRef.current = false;
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); stepYear(1); }
+              else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); stepYear(-1); }
+              else if (e.key === 'Home') { e.preventDefault(); selectYear(years[0]); }
+              else if (e.key === 'End') { e.preventDefault(); selectYear(years[years.length - 1]); }
+            }}
+          >
             <div 
-              className="absolute top-0 h-2.5 bg-[var(--geodesis-primary)] rounded-full transition-all duration-200"
+              className="absolute top-0 h-2.5 bg-[var(--geodesis-primary)] rounded-full pointer-events-none"
               style={{ width: `${progress}%` }}
             />
             {/* Scrub handle */}
             <div 
-              className="absolute top-1/2 -mt-1.5 w-4 h-4 bg-white border-[3px] border-[var(--geodesis-primary)] rounded-full shadow-sm cursor-grab active:cursor-grabbing transition-all"
+              className="absolute top-1/2 -mt-1.5 w-4 h-4 bg-white border-[3px] border-[var(--geodesis-primary)] rounded-full shadow-sm cursor-grab active:cursor-grabbing pointer-events-none"
               style={{ 
                 left: `${progress}%`,
                 transform: 'translateX(-50%)'
