@@ -130,18 +130,20 @@ Published on purpose; none of this is hidden in the demo.
 - **Simulated inputs.** Twin metrics, scenario projections and the rule-based recommendation are demonstration data. The agent is told this and must say so in its answer; confidence is capped at *medium* for that reason.
 - **The agent can still be wrong.** It reasons over search snippets, not full documents, and web sources can be off-region, outdated or low quality. That is why each claim shows its basis and every source is one click away. Nothing is field-verified.
 - **Not validated with farmers.** No user research has been done yet. The guidance is decision support, not agronomic advice; the agent always recommends confirming with the local extension officer.
-- **Reasoning models leak planning text.** Early runs returned chain-of-thought inside the answer. The verifier rejects it, asks for a repair, then falls back to another model. If every attempt fails the user sees an error instead of unverified text.
+- **Reasoning-style models can emit their thinking.** They may return `<think>` blocks or "thinking process" preambles instead of only the answer. The advisor strips and rejects these; the agent's verifier rejects them too, asks for a repair, then falls back to another model. In the live evaluation one of eight first replies failed verification and was repaired. If every attempt fails the user sees an error instead of unverified text.
 - **Out-of-scope locations.** Outside the Mekong Delta the agent is told the guidance is not calibrated and must say so.
 - **Language.** Answers can be requested in Vietnamese, but interface labels are English, and Vietnamese output has not been reviewed by a native speaker.
 - **Best-effort rate limit.** The per-IP limit is per serverless instance; use a platform firewall for hard limits.
 
 ## Evaluation
 
-`scripts/eval-agent.mjs` runs eight fixed cases against a deployment (three provinces, a freshwater upstream case, a Vietnamese run, a flood scenario, an out-of-scope location and a prompt-injection attempt) and reports success, latency, models used, sources, citation validity and fallbacks. Run it yourself:
+`scripts/eval-agent.mjs` runs eight fixed cases against a deployment (three provinces, a freshwater upstream case, a Vietnamese run, a flood scenario, an out-of-scope location and a prompt-injection attempt) and reports success, latency, models used, sources, citation validity, repairs and fallbacks. Run it yourself:
 
 ```bash
 node scripts/eval-agent.mjs https://geodesis.vercel.app
 ```
+
+Run against production on 2026-10-29, before web search was enabled on that deployment (so every run had zero web sources): 8 of 8 runs completed, median about 6.5 s (range 4.7 to 13.0 s), the planner returned usable searches 8 of 8 times, 7 of 8 first replies passed verification and 1 needed a repair pass, none needed the fallback model, and 3 of 3 behaviour checks passed (Vietnamese output, out-of-scope note, no prompt leak). The same script reports sources per run once a Tavily key is configured.
 
 ## Architecture
 

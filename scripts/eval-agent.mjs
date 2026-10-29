@@ -86,7 +86,9 @@ async function runCase(c, attempt = 0) {
     planner: models.planner,
     reasoner: models.reasoner,
     reasonAttempts: reasonSteps.length,
-    fellBack: reasonSteps.length > 1 || reasonSteps.some((s) => s.status === 'failed'),
+    // A failed verification triggers a repair on the same model; a different model in a later attempt is a fallback.
+    repaired: stepList.some((s) => s.id === 'verify' && s.status === 'failed'),
+    modelFallback: new Set(reasonSteps.map((s) => s.actor)).size > 1,
     sources: sources.length,
     forecast: !!forecast,
     searchStatus: steps.get('search')?.status,
@@ -118,7 +120,8 @@ for (const c of CASES) {
   }
   results.push(r);
   const flag = r.ok ? 'ok  ' : 'FAIL';
-  console.log(`${flag} ${c.id.padEnd(20)} ${String((r.ms / 1000).toFixed(1)).padStart(5)} s  ${r.ok ? `${r.reasoner} · ${r.sources} sources · ${r.actions} actions${r.fellBack ? ' · fallback' : ''}` : r.error}`);
+  const notes = r.ok ? `${r.repaired ? ' · repaired' : ''}${r.modelFallback ? ' · fallback model' : ''}` : '';
+  console.log(`${flag} ${c.id.padEnd(20)} ${String((r.ms / 1000).toFixed(1)).padStart(5)} s  ${r.ok ? `${r.reasoner} · ${r.sources} sources · ${r.actions} actions${notes}` : r.error}`);
   for (const [name, pass] of r.checks || []) console.log(`       check: ${name}: ${pass ? 'pass' : 'FAIL'}`);
   const wait = 11_000 - (Date.now() - started);
   if (wait > 0) await sleep(wait);
@@ -133,7 +136,8 @@ const summary = {
   succeeded: ok.length,
   medianMs: median(ok.map((r) => r.ms)),
   maxMs: Math.max(0, ...ok.map((r) => r.ms)),
-  fallbacks: ok.filter((r) => r.fellBack).length,
+  runsRepaired: ok.filter((r) => r.repaired).length,
+  runsWithFallbackModel: ok.filter((r) => r.modelFallback).length,
   withSources: ok.filter((r) => r.sources > 0).length,
   avgSources: ok.length ? +(ok.reduce((n, r) => n + r.sources, 0) / ok.length).toFixed(1) : 0,
   withForecast: ok.filter((r) => r.forecast).length,
