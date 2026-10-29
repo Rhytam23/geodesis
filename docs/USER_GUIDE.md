@@ -1,4 +1,4 @@
-# User Guide — MEKONG SMART LAND SYSTEM
+# User Guide — Geodesis
 
 ## Getting Started
 

@@ -1,4 +1,4 @@
-# Developer Guide — MEKONG SMART LAND SYSTEM
+# Developer Guide — Geodesis
 
 ## Tech Stack
 

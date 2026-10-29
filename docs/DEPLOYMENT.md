@@ -1,4 +1,4 @@
-# Deployment Guide — MEKONG SMART LAND SYSTEM
+# Deployment Guide — Geodesis
 
 ## Local Development
 
@@ -7,6 +7,8 @@ npm install
 npm run dev
 ```
 
+`npm run dev` also serves the serverless functions in `api/`. To try the AI features locally, copy `.env.example` to `.env.local`, add `NEBIUS_API_KEY` (and optionally `TAVILY_API_KEY`), and restart the dev server.
+
 ## Production Build
 
 ```bash
@@ -14,21 +16,25 @@ npm run build
 # Output in /dist
 ```
 
-## Vercel (Recommended for Hackathons)
+## Vercel (recommended)
 
-1. Connect GitHub repo to Vercel
-2. Framework preset: **Vite**
-3. Build command: `npm run build`
-4. Output directory: `dist`
-5. Deploy
+1. Connect the GitHub repo to Vercel.
+2. Framework preset: **Vite**. Build command `npm run build`, output directory `dist`.
+3. Under Project Settings, Environment Variables, add for **Production**:
+   - `NEBIUS_API_KEY` (required for the AI features)
+   - `TAVILY_API_KEY` (optional; enables web evidence in the agent)
+   - `NEBIUS_MODEL_FAST` / `NEBIUS_MODEL_DEEP` (optional; pin the planner and reasoning models)
+4. Deploy. Vercel applies environment variables only to new deployments, so redeploy after changing them.
 
-Environment variables can be set in Vercel dashboard.
+`vercel.json` gives `api/agent.ts` a 60-second budget; the agent stops itself before that and falls back to a smaller model if the large one is slow.
+
+Without `NEBIUS_API_KEY` the AI buttons report that the feature is not configured and everything else works. Without `TAVILY_API_KEY` the agent skips web search and never labels a claim as web evidence.
 
 ## Docker
 
 ```bash
-docker build -t mekong-smart-land .
-docker run -p 8080:80 mekong-smart-land
+docker build -t geodesis .
+docker run -p 8080:80 geodesis
 ```
 
 Or with compose:
@@ -37,35 +43,38 @@ Or with compose:
 docker-compose up --build
 ```
 
+The Docker image serves the static build only; the AI functions in `api/` run on Vercel.
+
 ## GitHub Actions
 
-CI runs on every push:
+CI runs on every push and pull request:
 - TypeScript check
 - Lint
+- Unit tests
 - Full production build
 
-See `.github/workflows/ci.yml`
+See `.github/workflows/ci.yml`.
 
-## Environment Setup
+## Verifying a deployment
 
-Always start from `.env.example`
+```bash
+node scripts/eval-agent.mjs https://your-deployment.example
+```
 
-## Production Hardening Checklist
+This runs eight fixed cases against the live agent (real model and search calls) and prints success, latency, models, sources and citation validity.
+
+## Production hardening checklist
 
 - [ ] Add real authentication
-- [ ] Proxy all data services through backend
+- [ ] Replace the in-memory rate limit with a durable one (or a platform firewall)
+- [ ] Set spend limits on the Nebius and Tavily accounts
 - [ ] Enable CSP headers
 - [ ] Set up monitoring (Sentry / Datadog)
-- [ ] Configure CDN for static assets
-- [ ] Add rate limiting
+- [ ] Configure a CDN for static assets
 - [ ] Set up automated dependency updates
 
-## Monitoring Recommendations
+## Monitoring recommendations
 
-- Track map click → recommendation latency
-- Monitor API fallback rate (live vs demo)
-- Track demo mode usage during presentations
-
----
-
-**v1.0 is ready for immediate deployment.**
+- Track agent latency and the share of runs that fall back to the smaller model
+- Monitor the rate of live vs demonstration-data fallbacks on the data services
+- Watch Nebius and Tavily credit balances

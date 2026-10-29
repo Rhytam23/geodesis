@@ -51,8 +51,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-[68px] flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-700 rounded-2xl flex items-center justify-center text-white font-bold text-lg tracking-tighter">MS</div>
-              <div className="font-semibold tracking-tight text-base sm:text-xl">MEKONG SMART LAND</div>
+              <div className="w-8 h-8 bg-emerald-700 rounded-2xl flex items-center justify-center text-white font-bold text-lg tracking-tighter">G</div>
+              <div className="font-semibold tracking-tight text-base sm:text-xl">Geodesis</div>
             </Link>
           </div>
 
@@ -132,7 +132,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       <footer className="border-t bg-white py-5 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 flex justify-between gap-4">
-          <div>© 2026 Mekong Smart Land • Demonstration Platform</div>
+          <div>© 2026 Geodesis • Demonstration Platform</div>
           <div className="hidden md:block">Satellite • Rule-Based Engine • Fully Transparent</div>
         </div>
       </footer>

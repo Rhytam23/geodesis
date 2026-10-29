@@ -59,8 +59,9 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-conduct@mekong-smart-land.example.com.
+reported to the community leaders responsible for enforcement, the repository
+maintainers, through the contact details on their GitHub profile
+(https://github.com/Rhytam23).
 
 All complaints will be reviewed and investigated promptly and fairly.
 
