@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import handler, { sanitizeAndValidateAdvice, buildMessages, isRateLimited, resetRateLimit } from '../api/advisor';
+import handler, { sanitizeAndValidateAdvice, buildMessages, isRateLimited, resetRateLimit, cleanApiKey, resolveProvider } from '../api/advisor';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 function createMockRes() {
@@ -374,5 +374,19 @@ describe('api/advisor hardening', () => {
     expect(res.statusCode).toBe(429);
     expect(res.body.error).toBe('rate_limited_client');
     expect(res.headers['Retry-After']).toBe('60');
+  });
+});
+
+describe('api/advisor key normalisation', () => {
+  it('strips quotes, whitespace, newlines and a Bearer prefix', () => {
+    expect(cleanApiKey('  "abc123"\n')).toBe('abc123');
+    expect(cleanApiKey("'abc123'")).toBe('abc123');
+    expect(cleanApiKey('Bearer abc123')).toBe('abc123');
+    expect(cleanApiKey(undefined)).toBe('');
+  });
+
+  it('resolveProvider uses the cleaned key', () => {
+    process.env.NEBIUS_API_KEY = ' "abc123"\n';
+    expect(resolveProvider()?.apiKey).toBe('abc123');
   });
 });
