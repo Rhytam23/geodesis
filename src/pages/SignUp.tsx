@@ -68,17 +68,15 @@ export default function SignUp() {
                   type="button" 
                   key={r.value} 
                   onClick={() => handleRoleSelect(r.value)}
-                  className={`group p-4 text-left border-2 rounded-3xl transition-all flex flex-col justify-between h-[110px] ${selectedRole === r.value 
+                  className={`group p-4 text-left border-2 rounded-3xl transition-all relative min-h-[132px] ${selectedRole === r.value 
                     ? 'border-emerald-600 bg-emerald-50 ring-1 ring-emerald-200' 
                     : 'border-slate-200 hover:border-slate-300'}`}
                 >
-                  <div>
-                    <div className="text-2xl mb-1.5">{r.icon}</div>
-                    <div className="font-semibold tracking-tight">{r.label}</div>
-                    <div className="text-xs text-slate-500 mt-0.5 leading-snug">{r.desc}</div>
-                  </div>
+                  <div className="text-2xl mb-1.5">{r.icon}</div>
+                  <div className="font-semibold tracking-tight">{r.label}</div>
+                  <div className="text-xs text-slate-500 mt-0.5 leading-snug">{r.desc}</div>
                   {selectedRole === r.value && (
-                    <div className="mt-2 self-end"><Check className="w-4 h-4 text-emerald-700" /></div>
+                    <Check className="absolute top-3 right-3 w-4 h-4 text-emerald-700" />
                   )}
                 </button>
               ))}
