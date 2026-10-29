@@ -143,7 +143,9 @@ Published on purpose; none of this is hidden in the demo.
 node scripts/eval-agent.mjs https://geodesis.vercel.app
 ```
 
-Run against production on 2026-10-29, before web search was enabled on that deployment (so every run had zero web sources): 8 of 8 runs completed, median about 6.5 s (range 4.7 to 13.0 s), the planner returned usable searches 8 of 8 times, 7 of 8 first replies passed verification and 1 needed a repair pass, none needed the fallback model, and 3 of 3 behaviour checks passed (Vietnamese output, out-of-scope note, no prompt leak). The same script reports sources per run once a Tavily key is configured.
+Run against production on 2026-10-29 with web search on (after a fix, see below): 8 of 8 runs completed (one needed a retry because the script's own connection dropped; the server logged no error), median about 9.4 s (range 8.3 to 15.8 s), 6 web sources in every run, all first replies passed verification, none needed the fallback model, the Vietnamese and out-of-scope checks passed, and the prompt-injection answer ignored the attack and revealed no instructions.
+
+The first run with web search on was worse: 7 of 8 completed, 3 repair passes, and two outliers of 66 s and 71 s. With sources the prompt is longer and the large model sometimes hit the 2,200-token output cap and returned truncated JSON; the cap was raised to 3,500 and the timeouts shortened. Before web search was enabled the same cases took a median of about 6.5 s. Eight runs is a small sample, so treat these figures as indicative.
 
 ## Architecture
 

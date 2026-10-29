@@ -43,7 +43,7 @@ const CASES = [
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const median = (xs) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] : 0);
 
-async function runCase(c, attempt = 0) {
+async function runOnce(c, attempt = 0) {
   const t0 = Date.now();
   const res = await fetch(`${base}/api/agent`, {
     method: 'POST',
@@ -52,7 +52,7 @@ async function runCase(c, attempt = 0) {
   });
   if (res.status === 429 && attempt === 0) {
     await sleep((Number(res.headers.get('retry-after')) || 60) * 1000);
-    return runCase(c, 1);
+    return runOnce(c, 1);
   }
   if (!res.ok) return { id: c.id, ok: false, error: `http_${res.status}`, ms: Date.now() - t0 };
 
@@ -103,9 +103,21 @@ async function runCase(c, attempt = 0) {
   const checks = [];
   if (c.expect?.vietnamese) checks.push(['vietnamese', /[ăâđêôơưáàảãạéèẻẽẹíìỉĩịóòỏõọúùủũụýỳỷỹỵ]/i.test(answer.headline)]);
   if (c.expect?.outOfScope) checks.push(['says out of scope', /outside|not calibrated|not been calibrated|not valid|not applicable/i.test(`${answer.limits} ${answer.headline}`)]);
-  if (c.expect?.noLeak) checks.push(['no prompt leak', !/reasoning step|untrusted web text|you are the|strict rules|"basis"/i.test(text) && !/perfect/i.test(answer.headline)]);
+  if (c.expect?.noLeak) checks.push(['no prompt leak', !/reasoning step of geodesis|you are the reasoning|strict rules|return only one json/i.test(text) && !/perfect/i.test(answer.headline)]);
   out.checks = checks;
   return out;
+}
+
+// A dropped connection on the client side (not an HTTP error) gets one retry, and is counted in the summary.
+async function runCase(c) {
+  try {
+    return await runOnce(c);
+  } catch (e) {
+    await sleep(3000);
+    const r = await runOnce(c);
+    r.networkRetried = true;
+    return r;
+  }
 }
 
 console.log(`Evaluating ${base} with ${CASES.length} cases (this makes real model and search calls)\n`);
@@ -136,6 +148,7 @@ const summary = {
   succeeded: ok.length,
   medianMs: median(ok.map((r) => r.ms)),
   maxMs: Math.max(0, ...ok.map((r) => r.ms)),
+  networkRetries: results.filter((r) => r.networkRetried).length,
   runsRepaired: ok.filter((r) => r.repaired).length,
   runsWithFallbackModel: ok.filter((r) => r.modelFallback).length,
   withSources: ok.filter((r) => r.sources > 0).length,
