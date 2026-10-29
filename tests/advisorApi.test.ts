@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import handler, { sanitizeAndValidateAdvice, buildMessages } from '../api/advisor';
+import handler, { sanitizeAndValidateAdvice, buildMessages, isRateLimited, resetRateLimit } from '../api/advisor';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 function createMockRes() {
@@ -66,6 +66,7 @@ beforeEach(() => {
   delete process.env.NEBIUS_API_KEY;
   delete process.env.AI_PROVIDER;
   vi.unstubAllGlobals();
+  resetRateLimit();
 });
 
 afterEach(() => {
@@ -334,5 +335,44 @@ describe('api/advisor handler', () => {
 
     expect(res.statusCode).toBe(502);
     expect(res.body.error).toBe('upstream_unreachable');
+  });
+});
+
+
+describe('api/advisor hardening', () => {
+  it('hides upstream detail and host in production', async () => {
+    process.env.NEBIUS_API_KEY = 'test-key';
+    process.env.VERCEL_ENV = 'production';
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: false,
+      status: 401,
+      text: async () => 'Incorrect API key provided: test-key',
+    })));
+    const res = createMockRes();
+    await handler(createMockReq(), res as unknown as VercelResponse);
+    expect(res.statusCode).toBe(502);
+    expect(res.body.error).toBe('auth_invalid');
+    expect(res.body.detail).toBeUndefined();
+    expect(res.body.host).toBeUndefined();
+    expect(JSON.stringify(res.body)).not.toContain('test-key');
+  });
+
+  it('rate-limits a client after 10 requests per window', () => {
+    const now = 1_000_000;
+    for (let i = 0; i < 10; i++) expect(isRateLimited('1.2.3.4', now)).toBe(false);
+    expect(isRateLimited('1.2.3.4', now)).toBe(true);
+    expect(isRateLimited('5.6.7.8', now)).toBe(false);
+    expect(isRateLimited('1.2.3.4', now + 61_000)).toBe(false);
+  });
+
+  it('answers 429 with Retry-After when the limit is exceeded', async () => {
+    process.env.NEBIUS_API_KEY = 'test-key';
+    const req = createMockReq({ headers: { 'x-forwarded-for': '9.9.9.9' } as VercelRequest['headers'] });
+    for (let i = 0; i < 10; i++) isRateLimited('9.9.9.9');
+    const res = createMockRes();
+    await handler(req, res as unknown as VercelResponse);
+    expect(res.statusCode).toBe(429);
+    expect(res.body.error).toBe('rate_limited_client');
+    expect(res.headers['Retry-After']).toBe('60');
   });
 });

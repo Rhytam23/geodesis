@@ -23,6 +23,42 @@ const DEFAULT_NVIDIA_MODEL = 'nvidia/llama-3.1-nemotron-70b-instruct';
 const MAX_BODY_BYTES = 16_000;
 const UPSTREAM_TIMEOUT_MS = 40_000;
 
+// Best-effort per-client limit. Serverless instances are short-lived and not shared,
+// so this blunts casual abuse of the paid upstream; use a platform firewall for hard limits.
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 10;
+const rateBuckets = new Map<string, { count: number; resetAt: number }>();
+
+/** Raw upstream error text can echo account or key details, so it is dev-only. */
+function exposeDiagnostics(): boolean {
+  return process.env.VERCEL_ENV !== 'production' && process.env.NODE_ENV !== 'production';
+}
+
+export function clientKey(req: VercelRequest): string | null {
+  const fwd = req.headers?.['x-forwarded-for'];
+  const first = (Array.isArray(fwd) ? fwd[0] : fwd)?.split(',')[0]?.trim();
+  return first || null;
+}
+
+/** Returns true when the client has exceeded its quota for the current window. */
+export function isRateLimited(key: string | null, now = Date.now()): boolean {
+  if (!key) return false;
+  if (rateBuckets.size > 500) {
+    for (const [k, v] of rateBuckets) if (v.resetAt <= now) rateBuckets.delete(k);
+  }
+  const bucket = rateBuckets.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    rateBuckets.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  bucket.count += 1;
+  return bucket.count > RATE_LIMIT_MAX;
+}
+
+export function resetRateLimit(): void {
+  rateBuckets.clear();
+}
+
 export interface AdvisorRecommendation {
   title: string;
   confidence: number;
@@ -334,6 +370,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+  if (isRateLimited(clientKey(req))) {
+    res.setHeader('Retry-After', String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)));
+    return res.status(429).json({ error: 'rate_limited_client' });
+  }
+
   const config = resolveProvider();
   if (!config) {
     console.error('advisor: neither NEBIUS_API_KEY nor NVIDIA_API_KEY is configured');
@@ -372,10 +413,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(502).json({
       error: category,
       status: attempt.res.status,
-      detail,
       model: config.model,
       provider: config.name,
-      host: new URL(config.baseUrl).host,
+      ...(exposeDiagnostics() ? { detail, host: new URL(config.baseUrl).host } : {}),
     });
   }
 
@@ -403,9 +443,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error(`advisor output failed validation after retry: ${validation.reason}`);
     return res.status(502).json({
       error: 'invalid_model_output',
-      detail: `Model output failed validation: ${validation.reason}`,
       provider: config.name,
       model: config.model,
+      ...(exposeDiagnostics() ? { detail: `Model output failed validation: ${validation.reason}` } : {}),
     });
   }
 
