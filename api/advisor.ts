@@ -262,16 +262,30 @@ export function classifyUpstreamError(status: number): string {
   return 'upstream_error';
 }
 
+/**
+ * Pasted secrets often arrive with surrounding quotes, whitespace/newlines or a
+ * "Bearer " prefix, all of which make the provider answer 401. Strip them.
+ */
+export function cleanApiKey(raw: string | undefined): string {
+  if (!raw) return '';
+  let key = raw.trim();
+  key = key.replace(/^["'`]+|["'`]+$/g, '').trim();
+  key = key.replace(/^bearer\s+/i, '').trim();
+  return key;
+}
+
 export function resolveProvider(): ProviderConfig | null {
   const explicit = (process.env.AI_PROVIDER || '').trim().toLowerCase();
+  const nebiusEnvKey = cleanApiKey(process.env.NEBIUS_API_KEY);
+  const nvidiaEnvKey = cleanApiKey(process.env.NVIDIA_API_KEY);
 
-  const nebiusKey = process.env.NEBIUS_API_KEY && !process.env.NEBIUS_API_KEY.startsWith('nvapi-')
-    ? process.env.NEBIUS_API_KEY
-    : (explicit === 'nebius' ? process.env.NEBIUS_API_KEY : '');
-  const nvidiaKey = process.env.NVIDIA_API_KEY || (process.env.NEBIUS_API_KEY?.startsWith('nvapi-') && explicit !== 'nebius' ? process.env.NEBIUS_API_KEY : '');
+  const nebiusKey = nebiusEnvKey && !nebiusEnvKey.startsWith('nvapi-')
+    ? nebiusEnvKey
+    : (explicit === 'nebius' ? nebiusEnvKey : '');
+  const nvidiaKey = nvidiaEnvKey || (nebiusEnvKey?.startsWith('nvapi-') && explicit !== 'nebius' ? nebiusEnvKey : '');
 
   if (explicit === 'nebius' || (!explicit && nebiusKey)) {
-    const key = process.env.NEBIUS_API_KEY || nebiusKey;
+    const key = nebiusEnvKey || nebiusKey;
     if (!key) return null;
     return {
       name: 'Nebius Token Factory',
@@ -283,7 +297,7 @@ export function resolveProvider(): ProviderConfig | null {
   }
 
   if (explicit === 'nvidia' || (!explicit && nvidiaKey)) {
-    const key = nvidiaKey || process.env.NVIDIA_API_KEY || process.env.NEBIUS_API_KEY;
+    const key = nvidiaKey || nvidiaEnvKey || nebiusEnvKey;
     if (!key) return null;
     return {
       name: 'NVIDIA API Catalog',
@@ -294,7 +308,7 @@ export function resolveProvider(): ProviderConfig | null {
     };
   }
 
-  const anyKey = process.env.NEBIUS_API_KEY || process.env.NVIDIA_API_KEY;
+  const anyKey = nebiusEnvKey || nvidiaEnvKey;
   if (!anyKey) return null;
 
   const isNv = anyKey.startsWith('nvapi-') && explicit !== 'nebius';
