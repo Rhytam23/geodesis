@@ -23,9 +23,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
       {/* Hero */}
       <div className="relative overflow-hidden border-b bg-white">
-        <div className="absolute inset-0 bg-[radial-gradient(#14532D_0.5px,transparent_1px)] bg-[length:5px_5px] opacity-[0.035]"></div>
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(#14532D_0.5px,transparent_1px)] bg-[length:5px_5px] opacity-[0.035]"></div>
         
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-16 sm:pb-24">
+        <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-16 sm:pb-24">
           <div className="max-w-3xl">
             <div className="inline-flex items-center px-4 py-1 rounded-full bg-emerald-100 text-emerald-800 text-sm font-medium mb-6">
               <div className="w-2 h-2 bg-emerald-600 rounded-full mr-2 animate-pulse"></div>
