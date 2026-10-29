@@ -69,11 +69,29 @@ export interface AdvisorRecommendation {
   reasoning: string[];
 }
 
-export interface AdvisorPayload {
+export interface AdvisorScenario {
+  name: string;
+  location: string;
+  year: number;
+  parameters: { rainfallDelta: number; salinityDelta: number; awdAdoption: number };
+  projections: Array<{ year: number; yield: number; waterUse: number; riskScore: number }>;
+}
+
+export interface RecommendationPayload {
+  mode?: 'recommendation';
   recommendation: AdvisorRecommendation;
   audience: string;
   language: string;
 }
+
+export interface ScenarioPayload {
+  mode: 'scenario';
+  scenario: AdvisorScenario;
+  audience: string;
+  language: string;
+}
+
+export type AdvisorPayload = RecommendationPayload | ScenarioPayload;
 
 export interface ProviderConfig {
   name: string;
@@ -97,8 +115,35 @@ function num(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0;
 }
 
+function parseScenarioPayload(raw: Record<string, unknown>): ScenarioPayload | null {
+  const sc = raw.scenario;
+  if (!sc || typeof sc !== 'object') return null;
+  const s = sc as Record<string, unknown>;
+  const params = (s.parameters && typeof s.parameters === 'object' ? s.parameters : {}) as Record<string, unknown>;
+  const projections = Array.isArray(s.projections)
+    ? s.projections.slice(0, 6).map((x) => {
+        const p = (x && typeof x === 'object' ? x : {}) as Record<string, unknown>;
+        return { year: num(p.year), yield: num(p.yield), waterUse: num(p.waterUse), riskScore: num(p.riskScore) };
+      }).filter((p) => p.year > 0)
+    : [];
+  if (projections.length === 0) return null;
+  return {
+    mode: 'scenario',
+    scenario: {
+      name: str(s.name, 120) || 'Custom scenario',
+      location: str(s.location, 120) || 'Selected location',
+      year: num(s.year),
+      parameters: { rainfallDelta: num(params.rainfallDelta), salinityDelta: num(params.salinityDelta), awdAdoption: num(params.awdAdoption) },
+      projections,
+    },
+    audience: str(raw.audience, 40) || 'farmer',
+    language: str(raw.language, 20) || 'English',
+  };
+}
+
 export function parsePayload(raw: unknown): AdvisorPayload | null {
   if (!raw || typeof raw !== 'object') return null;
+  if ((raw as Record<string, unknown>).mode === 'scenario') return parseScenarioPayload(raw as Record<string, unknown>);
   const rec = (raw as Record<string, unknown>).recommendation;
   if (!rec || typeof rec !== 'object') return null;
   const r = rec as Record<string, unknown>;
@@ -122,7 +167,52 @@ export function parsePayload(raw: unknown): AdvisorPayload | null {
   };
 }
 
+export function buildScenarioMessages(p: ScenarioPayload, isRetry = false) {
+  const { scenario: sc } = p;
+  const systemContent = [
+    'You are a concise agricultural advisor for Mekong Delta farmers and officials.',
+    'Explain what a what-if SIMULATION shows, plainly and honestly, in clear English under 120 words.',
+    'Provide ONLY the final 4-part explanation using this exact structure:',
+    '',
+    'Scenario outcome: <One or two sentences on how yield, water use and risk change across the projected years, using ONLY the supplied numbers.>',
+    'Why: <Which scenario settings (rainfall change, salinity increase, AWD adoption) plausibly drive that change. Stay general and do not invent numbers or mechanisms.>',
+    'Main risk: <The primary risk visible in the supplied numbers, in cautious proportionate language.>',
+    'Next step: <One practical action. Recommend consulting a qualified local agricultural extension officer before changing practices.>',
+    '',
+    'STRICT RULES:',
+    '- Total response must be under 120 words.',
+    '- Use ONLY the facts provided. Do not invent numbers, prices, rainfall data or guarantees.',
+    '- State that these are simulated projections on demonstration data, not measurements or forecasts of real fields.',
+    '- Never output chain-of-thought, scratchpads, planning notes, drafts or word counts.',
+    '- Never begin with "Here\'s a thinking process", "Let me analyze", "Step-by-step reasoning", or "Draft".',
+    '- Output ONLY the 4 required lines, starting immediately with "Scenario outcome:".',
+  ].join('\n');
+
+  const rows = sc.projections.map(
+    (x) => `- ${x.year}: yield ${x.yield} t/ha; water use ${x.waterUse} m3/ha; risk score ${x.riskScore}/100`,
+  );
+  const userLines = [
+    `Audience: ${p.audience}. Reply in ${p.language}.`,
+    `Scenario: ${sc.name} at ${sc.location}, simulated from ${sc.year}.`,
+    `Settings: rainfall change ${sc.parameters.rainfallDelta}%; salinity increase ${sc.parameters.salinityDelta} dS/m; AWD adoption ${sc.parameters.awdAdoption}%.`,
+    'Projected results (simulated):',
+    ...rows,
+  ];
+  if (isRetry) {
+    userLines.push(
+      '',
+      'CRITICAL: Your previous response contained internal planning or lacked the exact 4-part structure.',
+      'Output ONLY the final 4 lines now, starting directly with "Scenario outcome:". No preamble, no thinking process.',
+    );
+  }
+  return [
+    { role: 'system', content: systemContent },
+    { role: 'user', content: userLines.join('\n') },
+  ];
+}
+
 export function buildMessages(p: AdvisorPayload, isRetry = false) {
+  if (p.mode === 'scenario') return buildScenarioMessages(p, isRetry);
   const { recommendation: r } = p;
 
   const systemContent = [
@@ -173,7 +263,9 @@ export function buildMessages(p: AdvisorPayload, isRetry = false) {
  * Sanitizes and validates model output to ensure planning notes or chain-of-thought
  * are never presented to the farmer as final advice.
  */
-export function sanitizeAndValidateAdvice(raw: unknown): ValidationResult {
+export function sanitizeAndValidateAdvice(raw: unknown, lead = 'Recommendation'): ValidationResult {
+  const leadPattern = lead.replace(/\s+/g, '\\s+');
+  const leadHeader = new RegExp(`(?:^|\\n)\\s*(?:\\*\\*)?${leadPattern}\\s*:\\s*(?:\\*\\*)?`, 'i');
   if (!raw || typeof raw !== 'string') {
     return { valid: false, cleanText: '', reason: 'empty_response' };
   }
@@ -203,7 +295,7 @@ export function sanitizeAndValidateAdvice(raw: unknown): ValidationResult {
 
   // If planning markers exist at the start, check if an isolated clean 4-part block exists at the end
   if (hasPlanningMarker) {
-    const recIndex = text.search(/(?:^|\n)\s*(?:\*\*)?Recommendation\s*:\s*(?:\*\*)?/i);
+    const recIndex = text.search(leadHeader);
     if (recIndex !== -1) {
       const candidate = text.slice(recIndex).trim();
       if (!planningPatterns.some((pattern) => pattern.test(candidate))) {
@@ -223,7 +315,7 @@ export function sanitizeAndValidateAdvice(raw: unknown): ValidationResult {
   }
 
   // 3. Verify required 4-part structure
-  const hasRec = /(?:^|\n)\s*(?:\*\*)?Recommendation\s*:\s*(?:\*\*)?/i.test(text);
+  const hasRec = leadHeader.test(text);
   const hasWhy = /(?:^|\n)\s*(?:\*\*)?Why\s*:\s*(?:\*\*)?/i.test(text);
   const hasRisk = /(?:^|\n)\s*(?:\*\*)?Main\s+risk\s*:\s*(?:\*\*)?/i.test(text);
   const hasNext = /(?:^|\n)\s*(?:\*\*)?Next\s+step\s*:\s*(?:\*\*)?/i.test(text);
@@ -234,7 +326,7 @@ export function sanitizeAndValidateAdvice(raw: unknown): ValidationResult {
 
   // 4. Normalize markdown bolding on headers for clean presentation
   const formatted = text
-    .replace(/(?:^|\n)\s*\*\*Recommendation:\*\*\s*/gi, '\nRecommendation: ')
+    .replace(new RegExp(`(?:^|\\n)\\s*\\*\\*${leadPattern}:\\*\\*\\s*`, 'gi'), `\n${lead}: `)
     .replace(/(?:^|\n)\s*\*\*Why:\*\*\s*/gi, '\nWhy: ')
     .replace(/(?:^|\n)\s*\*\*Main risk:\*\*\s*/gi, '\nMain risk: ')
     .replace(/(?:^|\n)\s*\*\*Next step:\*\*\s*/gi, '\nNext step: ')
@@ -437,7 +529,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     choices?: Array<{ message?: { content?: string } }>;
   };
   let rawContent = data.choices?.[0]?.message?.content || '';
-  let validation = sanitizeAndValidateAdvice(rawContent);
+  const lead = payload.mode === 'scenario' ? 'Scenario outcome' : 'Recommendation';
+  let validation = sanitizeAndValidateAdvice(rawContent, lead);
 
   // 2. Retry Attempt if initial output failed validation
   if (!validation.valid) {
@@ -448,7 +541,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         choices?: Array<{ message?: { content?: string } }>;
       };
       rawContent = data.choices?.[0]?.message?.content || '';
-      validation = sanitizeAndValidateAdvice(rawContent);
+      validation = sanitizeAndValidateAdvice(rawContent, lead);
     }
   }
 

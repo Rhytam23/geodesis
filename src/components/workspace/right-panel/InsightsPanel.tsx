@@ -3,6 +3,7 @@ import DecisionIntelligence from '../../DecisionIntelligence';
 import EconomicDecision from '../../EconomicDecision';
 import { useGeodesisTwin } from '../../../hooks/useGeodesisTwin';
 import type { CropRecommendation, DecisionInput } from '../../../types/recommendation';
+import ScenarioAdvisorPanel from '../../ScenarioAdvisorPanel';
 
 /**
  * InsightsPanel
@@ -21,6 +22,7 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({ className = '' }) 
     currentYear,
     liveMetrics,
     simulationResults,
+    scenario,
   } = useGeodesisTwin();
 
   const locationName = selectedLocation
@@ -118,6 +120,26 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({ className = '' }) 
           currentCrop={currentCrop}
           recommended={mappedRecommendation}
           input={decisionInput}
+        />
+      )}
+
+      {/* What-if explainer: shown once a simulation has run */}
+      {simulationResults && (
+        <ScenarioAdvisorPanel
+          input={{
+            name: scenario.state.scenarioName || 'Custom scenario',
+            location: locationName,
+            year: currentYear,
+            parameters: {
+              rainfallDelta: scenario.state.parameters.rainfallDelta,
+              salinityDelta: scenario.state.parameters.salinityDelta,
+              awdAdoption: scenario.state.parameters.awdAdoption,
+            },
+            projections: Object.entries(simulationResults)
+              .map(([y, r]) => ({ year: Number(y), yield: r.yield, waterUse: r.waterUse, riskScore: r.riskScore }))
+              .sort((a, b) => a.year - b.year)
+              .slice(0, 4),
+          }}
         />
       )}
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import handler, { sanitizeAndValidateAdvice, buildMessages, isRateLimited, resetRateLimit, cleanApiKey, resolveProvider } from '../api/advisor';
+import handler, { sanitizeAndValidateAdvice, buildMessages, isRateLimited, resetRateLimit, cleanApiKey, resolveProvider, parsePayload } from '../api/advisor';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 function createMockRes() {
@@ -388,5 +388,75 @@ describe('api/advisor key normalisation', () => {
   it('resolveProvider uses the cleaned key', () => {
     process.env.NEBIUS_API_KEY = ' "abc123"\n';
     expect(resolveProvider()?.apiKey).toBe('abc123');
+  });
+});
+
+const scenarioBody = {
+  mode: 'scenario',
+  scenario: {
+    name: 'Moderate Drought',
+    location: 'Location 10.52°N, 105.13°E',
+    year: 2030,
+    parameters: { rainfallDelta: -15, salinityDelta: 0.8, awdAdoption: 35 },
+    projections: [
+      { year: 2030, yield: 3.9, waterUse: 6800, riskScore: 42 },
+      { year: 2031, yield: 3.6, waterUse: 7344, riskScore: 53 },
+      { year: 2032, yield: 3.4, waterUse: 7820, riskScore: 60 },
+    ],
+  },
+  audience: 'farmer',
+  language: 'English',
+};
+
+const validScenarioAdvice = [
+  'Scenario outcome: In this simulation yield falls from 3.9 to 3.4 t/ha by 2032 while water use and risk rise.',
+  'Why: Lower rainfall and higher salinity plausibly drive the decline, with AWD adoption only partly offsetting it.',
+  'Main risk: The risk score climbs from 42 to 60, so conditions worsen each year in this simulated run.',
+  'Next step: These are simulated projections on demonstration data, so consult a qualified local agricultural extension officer before changing practices.',
+].join('\n');
+
+describe('api/advisor scenario mode', () => {
+  it('parses a scenario payload and rejects one without projections', () => {
+    const ok = parsePayload(scenarioBody);
+    expect(ok?.mode).toBe('scenario');
+    if (ok?.mode === 'scenario') {
+      expect(ok.scenario.projections).toHaveLength(3);
+      expect(ok.scenario.parameters.rainfallDelta).toBe(-15);
+    }
+    expect(parsePayload({ mode: 'scenario', scenario: { name: 'x', projections: [] } })).toBeNull();
+    expect(parsePayload({ mode: 'scenario' })).toBeNull();
+  });
+
+  it('builds a prompt containing the settings, the rows and the simulated-data rule', () => {
+    const p = parsePayload(scenarioBody)!;
+    const text = buildMessages(p).map((m) => m.content).join('\n');
+    expect(text).toContain('rainfall change -15%');
+    expect(text).toContain('2031: yield 3.6 t/ha');
+    expect(text).toContain('Scenario outcome:');
+    expect(text.toLowerCase()).toContain('simulated');
+  });
+
+  it('validates the Scenario outcome header and still requires Recommendation by default', () => {
+    expect(sanitizeAndValidateAdvice(validScenarioAdvice, 'Scenario outcome').valid).toBe(true);
+    expect(sanitizeAndValidateAdvice(validScenarioAdvice).valid).toBe(false);
+    expect(sanitizeAndValidateAdvice(validFarmerAdvice, 'Scenario outcome').valid).toBe(false);
+  });
+
+  it('returns 200 for a scenario request and sends the scenario to the provider', async () => {
+    process.env.NEBIUS_API_KEY = 'mock-nebius-key';
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ choices: [{ message: { content: validScenarioAdvice } }] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const res = createMockRes();
+    await handler(createMockReq({ body: scenarioBody } as Partial<VercelRequest>), res as unknown as VercelResponse);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.advice).toContain('Scenario outcome:');
+    const sent = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    expect(JSON.stringify(sent.messages)).toContain('Moderate Drought');
   });
 });

@@ -61,12 +61,38 @@ export async function getAdvisorNarrative(
   audience?: string,
   language?: string,
 ): Promise<AdvisorResult> {
+  return postAdvisor(buildAdvisorRequest(rec, audience, language), signal);
+}
+
+export interface ScenarioAdvisorInput {
+  name: string;
+  location: string;
+  year: number;
+  parameters: { rainfallDelta: number; salinityDelta: number; awdAdoption: number };
+  projections: Array<{ year: number; yield: number; waterUse: number; riskScore: number }>;
+}
+
+export function buildScenarioRequest(input: ScenarioAdvisorInput, audience = 'farmer', language = 'English') {
+  return { mode: 'scenario' as const, scenario: input, audience, language };
+}
+
+/** Asks the advisor to explain a what-if simulation run. Read-only narrative. */
+export async function getScenarioNarrative(
+  input: ScenarioAdvisorInput,
+  signal?: AbortSignal,
+  audience?: string,
+  language?: string,
+): Promise<AdvisorResult> {
+  return postAdvisor(buildScenarioRequest(input, audience, language), signal);
+}
+
+async function postAdvisor(requestBody: unknown, signal?: AbortSignal): Promise<AdvisorResult> {
   let res: Response;
   try {
     res = await fetch('/api/advisor', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildAdvisorRequest(rec, audience, language)),
+      body: JSON.stringify(requestBody),
       signal,
     });
   } catch (err) {

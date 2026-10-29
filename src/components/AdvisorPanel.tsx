@@ -13,7 +13,7 @@ type State =
  * Map error reasons to user-friendly messages.
  * In development, include diagnostic detail; in production, keep it safe.
  */
-function friendlyErrorMessage(err: AdvisorUnavailableError): string {
+export function friendlyErrorMessage(err: AdvisorUnavailableError): string {
   const isDev = import.meta.env.DEV;
   const reason = err.reason;
   const provider = err.provider || 'Nebius Token Factory';
