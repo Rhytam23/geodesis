@@ -1,123 +1,321 @@
 openapi: 3.1.0
 info:
-  title: MEKONG SMART LAND SYSTEM API
-  version: 1.0.0
-  description: Production-ready REST API for the Climate Decision Intelligence Platform (planned for v1.1)
-  contact:
-    name: Mekong Smart Land Team
+  title: Geodesis serverless API
+  version: 1.1.0
+  description: |
+    The two serverless functions in `api/`. Both accept POST only, run on Vercel, call NVIDIA Nemotron
+    models on Nebius Token Factory and keep API keys on the server. Everything else in Geodesis runs in
+    the browser. The shared TypeScript contract for the agent is `src/types/agent.ts`.
+  license:
+    name: MIT
+    identifier: MIT
 
 servers:
-  - url: https://api.mekong-smart-land.vn/v1
-    description: Production
+  - url: https://geodesis.vercel.app
+    description: Hosted demo
+  - url: http://localhost:3000
+    description: Local (`npm run dev` serves api/*.ts)
 
 paths:
-  /weather:
-    get:
-      summary: Get weather for location
-      parameters:
-        - name: lat
-          in: query
-          required: true
-          schema:
-            type: number
-        - name: lng
-          in: query
-          required: true
-          schema:
-            type: number
-      responses:
-        '200':
-          description: Weather data
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WeatherResponse'
-
-  /soil:
-    get:
-      summary: Get soil data
-      parameters:
-        - name: lat
-          in: query
-          required: true
-        - name: lng
-          in: query
-          required: true
-      responses:
-        '200':
-          description: Soil data
-
-  /recommendations:
+  /api/agent:
     post:
-      summary: Generate crop recommendations
+      summary: Run the Geodesis Agent (plan, gather evidence, reason, verify)
+      description: |
+        Streams newline-delimited JSON. Each line is an `AgentEvent`: any number of `step` events that
+        report progress (a step is sent once when it starts and again when it finishes, with the same
+        `key`), then exactly one `result` or `error` event. Rate limited to six runs per minute per client.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DecisionInput'
+              $ref: '#/components/schemas/AgentRequest'
       responses:
         '200':
-          description: Ranked recommendations
+          description: NDJSON stream of agent events
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/AgentEvent'
+        '400': { $ref: '#/components/responses/Error' }
+        '405': { $ref: '#/components/responses/Error' }
+        '413': { $ref: '#/components/responses/Error' }
+        '429':
+          description: Rate limited (`rate_limited_client`); see the `Retry-After` header
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CropRecommendation'
+                $ref: '#/components/schemas/Error'
+        '503': { $ref: '#/components/responses/Error' }
 
-  /economic/compare:
+  /api/advisor:
     post:
-      summary: Economic comparison current vs recommended
+      summary: Explain a recommendation or a what-if simulation in plain language
+      description: |
+        Single model call. The reply is validated (no planning text, required four-part structure) with
+        one automatic retry. Read-only: it never changes a recommendation or a simulated number.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EconomicRequest'
+              oneOf:
+                - $ref: '#/components/schemas/AdvisorRecommendationRequest'
+                - $ref: '#/components/schemas/AdvisorScenarioRequest'
       responses:
         '200':
-          description: Full economic model
+          description: Plain-language explanation
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [advice, model, provider]
+                properties:
+                  advice: { type: string }
+                  model: { type: string }
+                  provider: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+        '405': { $ref: '#/components/responses/Error' }
+        '413': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+        '502':
+          description: |
+            Upstream problem. `error` is one of auth_invalid, quota_exhausted, access_denied, model_not_found,
+            rate_limited, provider_error, upstream_error, upstream_timeout, upstream_unreachable or
+            invalid_model_output. Upstream detail is only included outside production.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503': { $ref: '#/components/responses/Error' }
 
 components:
+  responses:
+    Error:
+      description: Error (`invalid_payload`, `method_not_allowed`, `payload_too_large`, `agent_not_configured`, `advisor_not_configured`, `rate_limited_client`)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
   schemas:
-    DecisionInput:
+    Error:
       type: object
+      required: [error]
       properties:
-        lat: { type: number }
-        lng: { type: number }
-        currentCrop: { type: string }
+        error: { type: string }
 
-    CropRecommendation:
+    AgentRequest:
       type: object
+      required: [question, context]
       properties:
-        crop: { type: string }
-        confidence: { type: integer }
-        expectedYield: { type: number }
-        expectedProfit: { type: number }
-        lastUpdated: { type: string }
-        uncertainty: { type: number }
-        # + full explainability fields
+        question: { type: string, minLength: 5, maxLength: 300 }
+        language: { type: string, enum: [English, Vietnamese], default: English }
+        context:
+          type: object
+          required: [location, year, metrics]
+          description: The simulated twin state the user is looking at.
+          properties:
+            location:
+              type: object
+              required: [name, lat, lng]
+              properties:
+                name: { type: string }
+                lat: { type: number, minimum: -90, maximum: 90 }
+                lng: { type: number, minimum: -180, maximum: 180 }
+            year: { type: integer }
+            metrics:
+              type: object
+              properties:
+                yield: { type: number, description: t/ha }
+                salinity: { type: number, description: dS/m }
+                waterIndex: { type: number }
+                ndvi: { type: number }
+                riskScore: { type: number, minimum: 0, maximum: 100 }
+            scenario:
+              type: object
+              properties:
+                name: { type: string }
+                rainfallDelta: { type: number, description: percent }
+                salinityDelta: { type: number, description: dS/m }
+                awdAdoption: { type: number, description: percent }
+            projections:
+              type: array
+              maxItems: 4
+              items:
+                type: object
+                properties:
+                  year: { type: integer }
+                  yield: { type: number }
+                  waterUse: { type: number }
+                  riskScore: { type: number }
+            recommendation:
+              type: object
+              properties:
+                crop: { type: string }
+                confidence: { type: number }
+                expectedYield: { type: number }
+                riskLevel: { type: string }
+                reasoning: { type: array, items: { type: string } }
 
-    WeatherResponse:
+    AgentEvent:
+      oneOf:
+        - type: object
+          required: [type, step]
+          properties:
+            type: { const: step }
+            step: { $ref: '#/components/schemas/AgentStep' }
+        - type: object
+          required: [type, answer, sources, models, totalMs]
+          properties:
+            type: { const: result }
+            answer: { $ref: '#/components/schemas/AgentAnswer' }
+            sources:
+              type: array
+              items: { $ref: '#/components/schemas/AgentSource' }
+            forecast:
+              oneOf:
+                - { $ref: '#/components/schemas/ForecastSummary' }
+                - { type: 'null' }
+            models:
+              type: object
+              properties:
+                planner: { type: string }
+                reasoner: { type: string }
+            corrections:
+              type: array
+              items: { type: string }
+              description: Automatic corrections applied by the verifier
+            totalMs: { type: integer }
+        - type: object
+          required: [type, error]
+          properties:
+            type: { const: error }
+            error: { type: string, description: 'invalid_model_output, cancelled or agent_failed' }
+
+    AgentStep:
       type: object
+      required: [key, id, label, status]
       properties:
-        source: { type: string }
-        lastUpdated: { type: string }
-        confidence: { type: integer }
-        current:
+        key: { type: string, description: 'Unique per step instance, e.g. reason#2' }
+        id: { type: string, enum: [context, plan, forecast, search, reason, verify] }
+        label: { type: string }
+        status: { type: string, enum: [running, done, skipped, failed] }
+        durationMs: { type: integer }
+        actor: { type: string, description: 'Model id, tool name or "code"' }
+        actorKind: { type: string, enum: [model, tool, code] }
+        detail: { type: string }
+        items: { type: array, items: { type: string } }
+        tokens:
           type: object
           properties:
-            temp: { type: number }
-            rainfall: { type: number }
+            prompt: { type: integer }
+            completion: { type: integer }
 
-    EconomicRequest:
+    AgentAnswer:
+      type: object
+      required: [headline, confidence, actions, risks, limits]
+      properties:
+        headline: { type: string }
+        confidence: { type: string, enum: [low, medium, high] }
+        actions:
+          type: array
+          items:
+            type: object
+            required: [step, why, basis, cites]
+            properties:
+              step: { type: string }
+              why: { type: string }
+              basis:
+                type: string
+                enum: [engine, forecast, evidence, assumption]
+                description: Only `evidence` claims may cite a source
+              cites: { type: array, items: { type: integer, minimum: 1 } }
+        risks:
+          type: array
+          items:
+            type: object
+            required: [risk, mitigation, cites]
+            properties:
+              risk: { type: string }
+              mitigation: { type: string }
+              cites: { type: array, items: { type: integer, minimum: 1 } }
+        limits: { type: string }
+
+    AgentSource:
+      type: object
+      required: [id, title, url, domain, snippet]
+      properties:
+        id: { type: integer, minimum: 1 }
+        title: { type: string }
+        url: { type: string, format: uri }
+        domain: { type: string }
+        snippet: { type: string }
+        publishedDate: { type: string }
+
+    ForecastSummary:
       type: object
       properties:
-        lat: { type: number }
-        lng: { type: number }
-        currentCrop: { type: string }
-        recommendedCrop: { type: string }
-```
+        days: { type: integer }
+        rainTotalMm: { type: number }
+        rainyDays: { type: integer }
+        wettestDay:
+          type: object
+          properties:
+            date: { type: string }
+            mm: { type: number }
+        maxTempC: { type: number }
+        minTempC: { type: number }
+        et0TotalMm: { type: [number, 'null'] }
+        source: { const: Open-Meteo }
 
-**Note**: This is the planned contract. v1.0 uses direct client services that match these shapes.
+    AdvisorRecommendationRequest:
+      type: object
+      required: [recommendation]
+      properties:
+        mode: { const: recommendation }
+        recommendation:
+          type: object
+          required: [title]
+          properties:
+            title: { type: string }
+            confidence: { type: number }
+            uncertainty: { type: number }
+            expectedYield: { type: number }
+            expectedIncome: { type: number }
+            waterSavings: { type: number }
+            reasoning: { type: array, items: { type: string } }
+        audience: { type: string, default: farmer }
+        language: { type: string, default: English }
+
+    AdvisorScenarioRequest:
+      type: object
+      required: [mode, scenario]
+      properties:
+        mode: { const: scenario }
+        scenario:
+          type: object
+          required: [projections]
+          properties:
+            name: { type: string }
+            location: { type: string }
+            year: { type: integer }
+            parameters:
+              type: object
+              properties:
+                rainfallDelta: { type: number }
+                salinityDelta: { type: number }
+                awdAdoption: { type: number }
+            projections:
+              type: array
+              minItems: 1
+              maxItems: 6
+              items:
+                type: object
+                properties:
+                  year: { type: integer }
+                  yield: { type: number }
+                  waterUse: { type: number }
+                  riskScore: { type: number }
+        audience: { type: string, default: farmer }
+        language: { type: string, default: English }

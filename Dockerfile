@@ -1,4 +1,4 @@
-# MEKONG SMART LAND SYSTEM — Production Dockerfile
+# Geodesis — Production Dockerfile
 # Multi-stage build for optimized image
 
 FROM node:20-alpine AS builder

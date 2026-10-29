@@ -1,11 +1,30 @@
 # Changelog
 
-All notable changes to the MEKONG SMART LAND SYSTEM will be documented in this file.
+All notable changes to Geodesis will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+
+## [1.1.0] - 2026-10-29 (Nebius x NVIDIA hackathon)
+
+### Added
+- **Geodesis Agent** (`api/agent.ts`, `src/components/AgentDrawer.tsx`): a plan, gather, reason, verify workflow on Nebius Token Factory with NVIDIA Nemotron. Streams a live run trace; combines an Open-Meteo 16-day forecast and Tavily web search; discovers the largest available Nemotron at runtime; verifies citations in code; repairs or falls back to a smaller model.
+- Nemotron AI advisor (`api/advisor.ts`) with a recommendation explainer and a what-if explainer, output validation, rate limiting and key normalisation.
+- `scripts/eval-agent.mjs`: live evaluation of the agent over eight fixed cases.
+- `npm run dev` now serves the `api/*.ts` functions.
+- 86 automated tests (agent, advisor, simulation, decision engine).
+
+### Changed
+- What-if simulation uses a coherent, documented model (the earlier mock had an inverted rainfall effect).
+- Timeline supports live dragging and arrow-key control.
+- All simulated values and layers are labelled; unsupported claims (model accuracy, "validated" results) were removed.
+- Branding is now Geodesis in the app UI, docs and Docker files.
+- `api/openapi.yaml` now describes the real endpoints instead of a planned REST API.
+
+### Removed
+- Unused components (`EnhancedGISMap`, `LocationAnalysisPanel`, `SatelliteDataTable`, the unused `common/` and `shared/` barrels and their children), a duplicate roadmap, a placeholder funding file and a deploy script for the old project name.
 
 ## [1.0.1] - 2026-07-08
 

@@ -1,76 +1,37 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | ✅ Full support    |
-| < 1.0   | ❌ No longer supported |
+| Version | Supported |
+| ------- | --------- |
+| 1.1.x   | Yes       |
+| < 1.1   | No        |
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
-We take security seriously. If you discover a vulnerability in the MEKONG SMART LAND SYSTEM, please report it responsibly.
+Please do not open a public issue for a security problem. Use GitHub's private vulnerability reporting for this repository (Security tab, "Report a vulnerability") if it is enabled, or contact the maintainer through their GitHub profile (<https://github.com/Rhytam23>).
 
-### How to Report
+Include a description, steps to reproduce, the potential impact and any suggested fix. This is a small hackathon-stage project, so response times are goals rather than guarantees: acknowledgement within a few days, a first assessment within two weeks.
 
-1. **Do NOT** create a public GitHub issue for security vulnerabilities.
-2. Email: security@mekong-smart-land.example.com (or open a private security advisory on GitHub)
-3. Include:
-   - Description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Any suggested fixes
+## Security posture of this release
 
-### Response Timeline
+Implemented:
+- **Secrets stay on the server.** `NEBIUS_API_KEY` and `TAVILY_API_KEY` are read only by the serverless functions in `api/` and never reach the browser bundle. `.env.local` is git-ignored.
+- **Request hardening** on `api/advisor.ts` and `api/agent.ts`: body size limits, input validation and clamping, a per-IP rate limit, upstream timeouts, and upstream error details hidden in production.
+- **Untrusted web content.** The agent treats search results as untrusted text, never executes anything a model returns, and only links URLs that came from the search provider. Model output is validated before it is shown.
+- No user data is stored by the server. External data calls use public services (Open-Meteo, SoilGrids, Nominatim, Tavily, Nebius Token Factory).
 
-- **Acknowledgment**: Within 48 hours
-- **Initial assessment**: Within 7 days
-- **Fix release**: Critical vulnerabilities patched within 14 days
+Known limitations:
+- The rate limit is in memory per serverless instance. It blunts casual abuse but is not a hard quota; use a platform firewall for that.
+- There is no authentication or authorisation layer. The demo is public by design.
+- The agent spends Nebius and Tavily credits when used, so keep spend limits on both accounts.
+- Dependencies (Leaflet, Recharts and others) should be monitored; Dependabot is recommended.
 
-## Security Considerations for v1.0
+Recommended before any real-world use: authentication, a durable rate limit, a Content Security Policy (HSTS and other headers are already set in `vercel.json`), dependency scanning and an independent security review.
 
-This is a **client-side heavy prototype**. Current security posture:
-
-### ✅ Implemented
-- No hardcoded secrets in source
-- Client-side only (no user data stored server-side)
-- Error boundaries prevent full app crashes
-- Input validation on location selection & search
-- All external API calls use public, rate-limited services (Open-Meteo, SoilGrids, Nominatim)
-- Demo mode is deterministic and isolated
-
-### ⚠️ Known Limitations (v1.0)
-- No authentication / authorization layer yet
-- No rate limiting on client-side API calls
-- All data services fall back to demonstration datasets
-- No server-side validation (when backend is added)
-- Leaflet / Recharts dependencies should be monitored
-
-### Recommended Production Hardening
-- Add OAuth2 / JWT authentication (Auth0, Clerk, or Vietnamese gov SSO)
-- Backend proxy for all external data services
-- Input sanitization + CSRF protection
-- Content Security Policy (CSP)
-- HTTPS + HSTS
-- Dependency scanning (Dependabot / Snyk)
-- Regular penetration testing
-
-## Data Privacy
+## Data privacy
 
 - No personal farmer data is collected in demo mode.
-- Location queries are ephemeral (not logged).
-- When integrating real SMS / user profiles, ensure GDPR / Vietnamese data protection compliance.
-
-## Dependencies
-
-We regularly audit:
-- `leaflet`, `react-leaflet`
-- `recharts`
-- `framer-motion`
-- All dev dependencies
-
-Report any dependency vulnerabilities via the process above.
-
----
-
-**Last updated**: 2026-07-03 (v1.0)
+- Location queries are not logged by the application.
+- Coordinates and the question text are sent to Nebius Token Factory, Tavily and Open-Meteo when the agent runs. Do not enter personal information.
+- Before integrating real SMS or user profiles, ensure compliance with GDPR and Vietnamese data protection law.

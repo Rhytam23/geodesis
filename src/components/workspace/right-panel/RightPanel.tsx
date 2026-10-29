@@ -4,6 +4,7 @@ import { Button } from '../../common/Button';
 import { LoadingSkeleton } from '../../common/LoadingSkeleton';
 import { useGeodesisTwin } from '../../../hooks/useGeodesisTwin';
 import { InsightsPanel } from './InsightsPanel';
+import AgentLauncher from '../../AgentLauncher';
 
 /**
  * RightPanel - The live command center of the Digital Twin.
@@ -138,6 +139,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({ onCollapse }) => {
             </Button>
           </div>
         </div>
+
+        {/* Multi-step research agent (plan, gather evidence, reason, verify) on Nebius Token Factory */}
+        <AgentLauncher />
 
         {/* AI Insights + Economic — fully wired via InsightsPanel (reuses DecisionIntelligence + EconomicDecision) */}
         <InsightsPanel />

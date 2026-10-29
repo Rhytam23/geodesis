@@ -52,10 +52,10 @@ export default function SignUp() {
       <div className="w-full max-w-[520px]">
         <div className="text-center mb-8">
           <div className="mx-auto w-14 h-14 bg-emerald-700 rounded-3xl flex items-center justify-center mb-5 shadow-sm">
-            <span className="text-white font-bold text-3xl tracking-tighter">MS</span>
+            <span className="text-white font-bold text-3xl tracking-tighter">G</span>
           </div>
           <h1 className="text-4xl font-semibold tracking-tighter">Create your account</h1>
-          <p className="text-slate-500 mt-2">Join the Mekong Smart Land platform</p>
+          <p className="text-slate-500 mt-2">Join the Geodesis platform</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-md transition-all">

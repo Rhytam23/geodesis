@@ -1,4 +1,4 @@
-# Architecture Overview — MEKONG SMART LAND SYSTEM v1.0
+# Architecture Overview — Geodesis
 
 ## High-Level Architecture
 
@@ -33,8 +33,8 @@ The platform is a **client-side-first React application** (Vite + TypeScript) wi
    - Services are pure functions + caching. Easy to swap for production APIs.
 4. **Graceful Degradation**
    - Live APIs → deterministic demo fallbacks.
-5. **Client-Only v1.0**
-   - Zero backend required for demos and hackathons.
+5. **Client-First**
+   - The map, decision engine, economics and dashboards need no backend. Only the AI features use serverless functions (`api/`).
 
 ## Key Modules
 
@@ -68,9 +68,25 @@ The platform is a **client-side-first React application** (Vite + TypeScript) wi
 
 ## Decision Engine (Modular)
 
-See [AI_ENGINE.md](./AI_ENGINE.md)
+Current implementation uses deterministic weighted scoring in `src/services/decisionEngine.ts`. There is no trained model in this release, and the engine has not been validated against field or yield data. A trained model is a roadmap item.
 
-Current implementation uses deterministic weighted scoring. Designed for future replacement by ML (XGBoost/LSTM) without UI changes.
+## AI Layer (Nebius Token Factory + NVIDIA Nemotron)
+
+Two serverless functions in `api/` call Nemotron models on Nebius Token Factory. Keys stay on the server.
+
+- `api/advisor.ts`: single-call explainer with two modes (explain a recommendation, explain a what-if run). Validates the reply and retries once if it contains planning text.
+- `api/agent.ts`: the Geodesis Agent, a multi-step workflow that streams its progress as NDJSON.
+
+```
+context  -> twin state the user is looking at (simulated)
+plan     -> fast Nemotron chooses 2-3 web searches
+gather   -> Open-Meteo 16-day forecast  +  Tavily web search   (parallel)
+reason   -> largest Nemotron available writes a structured, cited answer
+verify   -> code checks JSON, citations, URLs, simulated-data note;
+            one repair pass, then a fallback model
+```
+
+Model IDs are discovered at runtime from `GET /v1/models` (Ultra, else Super for reasoning; Lightning or Nano for planning) and can be pinned with `NEBIUS_MODEL_FAST` and `NEBIUS_MODEL_DEEP`. Every claim in an agent answer carries a basis (`engine`, `forecast`, `evidence`, `assumption`); only claims backed by a retrieved source may cite it. The agent never changes the simulation or the rule-based recommendation. See `src/types/agent.ts` for the shared contract.
 
 ## Economic Calculations
 
@@ -110,4 +126,4 @@ Overrides are applied at the **SmartMap** and **GovernmentDashboard** level usin
 
 ---
 
-**Status**: v1.0 — Fully functional, production-ready prototype.
+**Status**: v1.1 — working demonstration prototype. The twin data is simulated and labelled as such; the AI agent makes live model, search and forecast calls.

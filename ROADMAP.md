@@ -1,47 +1,36 @@
-# 🗺️ Geodesis Project Roadmap
+# Geodesis Roadmap
 
-This document outlines the vision and development milestones for **Geodesis** — an open-source geospatial digital twin for climate-resilient agriculture in the Mekong Delta.
+Geodesis is an open-source geospatial digital twin and research agent for climate-resilient rice farming in the Mekong Delta. This roadmap separates what exists from what is only planned.
 
----
+## Done
 
-## 🎯 Release Horizons
+### v1.0: public foundation (2026-07)
+- Map-first interactive GIS twin (Leaflet, React 18, Vite)
+- Explainable rule-based decision engine with five-factor weighted confidence scoring
+- Scenario builder (rainfall, salinity and AWD sliders) driving a transparent what-if model
+- Role dashboards: farmer, cooperative, government, researcher
+- Weather and soil adapters (Open-Meteo, ISRIC SoilGrids)
 
-### 🟢 Version 1.0.0 — Public Foundation (Current)
-- [x] Map-first interactive GIS twin (Leaflet + React 18 + Vite)
-- [x] Explainable AI decision engine with 5-factor weighted confidence scoring
-- [x] Real-time scenario builder (rain, salinity, AWD sliders)
-- [x] Multi-role dashboards (Farmer, Cooperative, Government, Researcher)
-- [x] Weather & soil integration (Open-Meteo & ISRIC SoilGrids API adapters)
-- [x] Responsive layout with dark mode tokens & glassmorphism aesthetic
+### v1.1: Nebius x NVIDIA hackathon (2026-08 to 2026-10)
+- Geodesis Agent: plan, gather evidence, reason, verify, on Nebius Token Factory with Nemotron
+- Live evidence: Tavily web search and an Open-Meteo 16-day forecast, with cited, verifiable answers
+- Advisor with two read-only modes (recommendation explainer, what-if explainer)
+- Coherent what-if simulation model with tests; every simulated value labelled
+- Draggable, keyboard-accessible timeline; accessibility and layout fixes
+- Published limitations and a live evaluation script (`scripts/eval-agent.mjs`)
 
----
+## Next (not started)
 
-### 🟡 Version 1.1.0 — Data Integration & Localization (Q3 2026)
-- [ ] **Vietnamese UI Localization**: Full `vi-VN` language toggle and localized term dictionaries
-- [ ] **Direct GEE Script Ingestion**: Ingest Sentinel-2 and Landsat-9 imagery pipelines via Google Earth Engine API
-- [ ] **Expanded Crop Database**: Add 6 additional delta crops (durian, dragon fruit, mango, pangasius catfish, brackish shrimp, saline rice)
-- [ ] **Historical Drought Replay**: Pre-packaged datasets for historical climate events (2016 & 2020 Mekong droughts)
-- [ ] **Export Engine Upgrade**: Export scenario results to GeoJSON, Shapefile, and PDF executive briefs
+These need data or people we do not have yet, so they are listed rather than implied.
 
----
+- **Validate with users.** Run the agent with farmers and extension officers; record where it is wrong.
+- **Calibrate the model.** Fit the what-if model to real yield and salinity records and report the error.
+- **Real satellite inputs.** Replace the simulated NDVI and salinity layers with Sentinel products (for example through Google Earth Engine).
+- **Vietnamese interface.** Translate the UI and have a native speaker review the Vietnamese answers.
+- **Saved scenarios and export.** Persist scenarios, export results as GeoJSON and PDF briefs.
+- **Alerts.** SMS or messaging alerts for cooperatives (VNPT or Twilio).
+- **More regions.** Other delta systems (Red River, Chao Phraya, Indus).
 
-### 🔵 Version 1.2.0 — Backend & Alerts (Q4 2026)
-- [ ] **Backend Service Layer**: Node.js / Go microservice REST API (`api.geodesis.vn`)
-- [ ] **SMS Gateway Adapter**: Automated broadcast SMS triggers for registered farming cooperatives via VNPT / Twilio
-- [ ] **PWA & Offline First**: Full ServiceWorker caching for zero-connectivity field use on mobile devices
-- [ ] **Community Crowdsourcing**: Farmer-reported ground truth telemetry ingestion for model calibration
+## Feedback
 
----
-
-### 🟣 Version 2.0.0 — Global Extension (2027)
-- [ ] **Multi-Region Support**: Support for additional delta systems (Red River Delta, Chao Phraya Delta, Indus Delta)
-- [ ] **High-Resolution Drone Telemetry**: UAV point-cloud and thermal camera layer overlays
-- [ ] **Federated Learning Support**: Edge ML model execution for localized crop yield predictions
-
----
-
-## 💬 Community Feedback & Contributions
-
-Roadmap priorities are shaped by feedback from farmers, agricultural extension officers, and climate researchers.
-
-To request a feature or join development, please read our [CONTRIBUTING.md](./CONTRIBUTING.md) or open a discussion on GitHub.
+Priorities should follow feedback from farmers, extension officers and researchers. To suggest something, read [CONTRIBUTING.md](./CONTRIBUTING.md) or open an issue.
