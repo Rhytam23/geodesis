@@ -4,6 +4,7 @@ import EconomicDecision from '../../EconomicDecision';
 import { useGeodesisTwin } from '../../../hooks/useGeodesisTwin';
 import type { CropRecommendation, DecisionInput } from '../../../types/recommendation';
 import ScenarioAdvisorPanel from '../../ScenarioAdvisorPanel';
+import { summarizeRecommendation } from '../../../services/agentContext';
 
 /**
  * InsightsPanel
@@ -29,21 +30,17 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({ className = '' }) 
     ? `Location ${selectedLocation.lat.toFixed(2)}°N, ${selectedLocation.lng.toFixed(2)}°E`
     : 'Selected Region';
 
-  // Map live twin metrics → CropRecommendation (for DecisionIntelligence reuse)
+  // Map live twin metrics → CropRecommendation (for DecisionIntelligence reuse).
+  // The headline fields are shared with the Geodesis Agent so both always agree.
+  const summary = summarizeRecommendation(liveMetrics, currentYear);
   const mappedRecommendation: CropRecommendation = {
-    crop: liveMetrics.salinity > 5.2 ? 'Salt-Tolerant ST25' : 'Standard High-Yield Rice',
-    confidence: Math.round(78 + (liveMetrics.yield - 3.8) * 7),
-    expectedYield: liveMetrics.yield,
+    crop: summary.crop,
+    confidence: summary.confidence,
+    expectedYield: summary.expectedYield,
     expectedProfit: Math.round(28.5 + (liveMetrics.economicHealth - 75) * 0.85),
     waterRequirement: Math.round(6200 + (1 - liveMetrics.waterIndex) * 1800),
-    riskLevel: liveMetrics.riskScore > 55 ? 'Medium' : 'Low',
-    reasoning: [
-      liveMetrics.salinity > 5.2 
-        ? 'High salinity tolerance required under projected conditions' 
-        : 'Strong baseline performance with current practices',
-      `Yield projected at ${liveMetrics.yield} t/ha for ${currentYear}`,
-      liveMetrics.riskScore > 50 ? 'Risk mitigation via AWD and barriers advised' : 'Stable risk profile',
-    ],
+    riskLevel: summary.riskLevel,
+    reasoning: summary.reasoning,
     supportingEvidence: [
       `Salinity: ${liveMetrics.salinity} dS/m`,
       `NDVI: ${liveMetrics.ndvi}`,
