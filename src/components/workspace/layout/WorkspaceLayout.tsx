@@ -54,10 +54,10 @@ export const WorkspaceLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--geodesis-background)]">
+    <div className="h-screen flex flex-col bg-[var(--geodesis-background)]">
       <TopNavigation />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {/* Main 3-column area */}
         <div className="flex-1 flex min-h-0">
           {/* Left Sidebar */}

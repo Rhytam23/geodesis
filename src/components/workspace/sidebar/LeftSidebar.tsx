@@ -11,16 +11,16 @@ interface LeftSidebarProps {
 }
 
 export const LeftSidebar: React.FC<LeftSidebarProps> = ({ onCollapse }) => {
-  const { scenario, timeline } = useGeodesisTwin();
-  const { state: scenarioState, selectScenario, updateName } = scenario;
+  const { scenario, timeline, selectLocation } = useGeodesisTwin();
   const { setYear } = timeline;
+  const { state: scenarioState, selectScenario, updateName } = scenario;
 
   const demoRegions = [
-    'An Giang Province',
-    'Kien Giang Province',
-    'Soc Trang Province',
-    'Dong Thap Province',
-    'Can Tho City',
+    { name: 'An Giang Province', lat: 10.52, lng: 105.13 },
+    { name: 'Kien Giang Province', lat: 9.95, lng: 105.15 },
+    { name: 'Soc Trang Province', lat: 9.6, lng: 105.98 },
+    { name: 'Dong Thap Province', lat: 10.46, lng: 105.63 },
+    { name: 'Can Tho City', lat: 10.04, lng: 105.75 },
   ];
 
   const demoScenarios = [
@@ -85,13 +85,13 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ onCollapse }) => {
         </div>
 
         <div className="space-y-1">
-          {demoRegions.map((region, i) => (
+          {demoRegions.map((region) => (
             <button
-              key={i}
-              onClick={() => timeline.setYear(2026)}
+              key={region.name}
+              onClick={() => selectLocation(region.lat, region.lng, { province: region.name })}
               className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-50 text-[var(--geodesis-text-secondary)] text-sm"
             >
-              {region}
+              {region.name}
             </button>
           ))}
         </div>

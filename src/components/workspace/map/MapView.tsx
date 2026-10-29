@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ProfessionalGISMap from '../../ProfessionalGISMap';
 import { useGeodesisTwin } from '../../../hooks/useGeodesisTwin';
 
@@ -15,17 +15,13 @@ interface MapViewProps {
 }
 
 export const MapView: React.FC<MapViewProps> = ({ selectedYear }) => {
-  const { timeline, selectLocation: twinSelectLocation } = useGeodesisTwin();
+  const { timeline, selectLocation: twinSelectLocation, selectedLocation: twinLocation } = useGeodesisTwin();
   const yearToShow = selectedYear || timeline.state.selectedYear;
 
-  // Local state for the selected location (will be lifted in future batches)
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  // The twin state is the single source of truth, so the sidebar and the map stay in sync
+  const selectedLocation = twinLocation ? { lat: twinLocation.lat, lng: twinLocation.lng } : null;
 
   const handleLocationSelect = (lat: number, lng: number, meta?: any) => {
-    const loc = { lat, lng };
-    setSelectedLocation(loc);
-
-    // Wire to central twin state
     twinSelectLocation(lat, lng, meta);
   };
 
