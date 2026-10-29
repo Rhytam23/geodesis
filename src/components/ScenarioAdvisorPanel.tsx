@@ -89,12 +89,12 @@ export default function ScenarioAdvisorPanel({ input }: { input: ScenarioAdvisor
         </tbody>
       </table>
 
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-3 flex flex-col gap-2">
         <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Nemotron on Nebius</div>
         <button
           onClick={ask}
           disabled={state.status === 'loading'}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-emerald-200 text-emerald-700 font-semibold text-xs hover:bg-emerald-50 disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-1.5 px-4 py-2 rounded-full border border-emerald-200 text-emerald-700 font-semibold text-xs hover:bg-emerald-50 disabled:opacity-60"
         >
           <Sparkles className="w-3.5 h-3.5" />
           {state.status === 'loading' ? 'ASKING...' : 'EXPLAIN THIS SCENARIO'}

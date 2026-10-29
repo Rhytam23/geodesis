@@ -13,6 +13,8 @@ export interface SimulationInput {
   readonly rainfallDelta?: number;
   readonly salinityDelta?: number;
   readonly awdAdoption?: number;
+  /** Yield (t/ha) of the selected location in the starting year; the projection is anchored to it. */
+  readonly baselineYield?: number;
   readonly parameters?: Record<string, number>;
   readonly resolution?: 'annual' | 'seasonal';
 }

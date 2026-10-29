@@ -232,6 +232,7 @@ export const useGeodesisTwin = (): GeodesisTwinAPI => {
       rainfallDelta: params.rainfallDelta,
       salinityDelta: params.salinityDelta,
       awdAdoption: params.awdAdoption,
+      baselineYield: liveMetrics.yield,
     });
 
     // Build simulation results map (deterministic for future years)

@@ -76,7 +76,7 @@ export function calculateEconomicComparison(
     : { name: 'Local Cooperative', distance: 5.8, members: 920 };
 
   const assumptions = [
-    'Prices based on current MARD/VFA regional averages',
+    'Prices are illustrative regional averages (demonstration values)',
     'Yields adjusted by local NDVI and salinity data',
     'Costs include seeds, fertilizer, labor, irrigation, and pest control',
     'Investment covers variety change + basic AWD infrastructure',
