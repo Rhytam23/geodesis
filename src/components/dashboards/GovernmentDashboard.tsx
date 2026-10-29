@@ -493,7 +493,7 @@ export default function GovernmentDashboard() {
                 <div className="font-semibold text-lg">Province Heatmap — Salinity Risk</div>
                 <div className="text-xs text-slate-500">Color intensity = risk level • Click province chips above to filter</div>
               </div>
-              <DataBadge source="Sentinel-1 + SoilGrids + MONRE" confidence={liveData.soil?.confidence ?? 84} />
+              <DataBadge source="SoilGrids (live) + simulated Sentinel-1 / MONRE" confidence={liveData.soil?.confidence ?? 84} />
             </div>
 
             <div className="h-72">
@@ -632,7 +632,7 @@ export default function GovernmentDashboard() {
               <div className="font-semibold flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-600" /> Emergency Alerts ({emergencyAlerts.length})
               </div>
-              <DataBadge source="MARD + MONRE" />
+              <DataBadge source="MARD + MONRE (simulated)" />
             </div>
             <div className="space-y-2 max-h-80 overflow-auto text-sm pr-1">
               {emergencyAlerts.length === 0 && <div className="text-slate-500 text-xs py-3">No high-priority alerts for current filters.</div>}
@@ -715,7 +715,7 @@ export default function GovernmentDashboard() {
         {/* Bottom bar — transparency + actions */}
         <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 gap-y-2 bg-white border rounded-2xl px-5 py-3">
           <div className="flex items-center gap-3">
-            <div>Data sources: Sentinel-1/2 • SoilGrids v2.0 • Open-Meteo • MARD • MONRE • Decision Engine v2.0</div>
+            <div>Live: Open-Meteo, SoilGrids v2.0 • Simulated: Sentinel, MARD, MONRE • Decision Engine v2.0 (rule-based)</div>
             <DataBadge source="Live + 10min cache" />
           </div>
           <div className="flex items-center gap-4">

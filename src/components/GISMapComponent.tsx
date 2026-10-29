@@ -21,10 +21,10 @@ interface GISMapProps {
 }
 
 const LAYER_CONFIGS: LayerConfig[] = [
-  { id: 'salinity', name: 'Salinity (dS/m)', type: 'heatmap', active: true, opacity: 0.85, color: '#DC2626', dataSource: 'Sentinel-1 + MONRE' },
+  { id: 'salinity', name: 'Salinity (dS/m)', type: 'heatmap', active: true, opacity: 0.85, color: '#DC2626', dataSource: 'Simulated (Sentinel-1 / MONRE style)' },
   { id: 'ndvi', name: 'Vegetation (NDVI)', type: 'heatmap', active: true, opacity: 0.75, color: '#22C55E', dataSource: 'Sentinel-2' },
   { id: 'rainfall', name: 'Rainfall', type: 'heatmap', active: false, opacity: 0.7, color: '#3B82F6', dataSource: 'CHIRPS' },
-  { id: 'groundwater', name: 'Groundwater', type: 'heatmap', active: false, opacity: 0.8, color: '#8B5CF6', dataSource: 'NASA MODIS + MONRE' },
+  { id: 'groundwater', name: 'Groundwater', type: 'heatmap', active: false, opacity: 0.8, color: '#8B5CF6', dataSource: 'Simulated (MODIS / MONRE style)' },
 ];
 
 const provincePolygons = provinces.map(p => {

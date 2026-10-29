@@ -55,7 +55,7 @@ export default function PipelineVisualizer({ autoPlay = true, onComplete }: Pipe
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="font-semibold tracking-tight text-xl">Data Processing Pipeline</div>
-          <div className="text-xs text-emerald-700">Real-time satellite ingestion to decision intelligence</div>
+          <div className="text-xs text-emerald-700">Simulated pipeline: satellite-style ingestion to decision intelligence</div>
         </div>
         <div className="flex items-center gap-2">
           <button 

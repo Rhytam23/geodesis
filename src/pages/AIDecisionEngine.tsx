@@ -199,7 +199,7 @@ export default function AIDecisionEngine() {
                 </button>
               </div>
 
-              <div className="mt-2 text-xs text-center text-slate-500">All predictions include 95% confidence intervals. Validated against 2020 event dataset.</div>
+              <div className="mt-2 text-xs text-center text-slate-500">Confidence and uncertainty come from rule-based scoring on demonstration data. They are not validated against field results.</div>
             </div>
           )}
         </div>

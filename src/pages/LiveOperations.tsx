@@ -72,9 +72,9 @@ export default function LiveOperations() {
         <div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="font-semibold text-3xl sm:text-5xl tracking-tighter">Live Operations Center</div>
-            <div className="px-3 text-xs py-1 bg-red-100 text-red-700 rounded-full font-bold">LIVE</div>
+            <div className="px-3 text-xs py-1 bg-red-100 text-red-700 rounded-full font-bold">DEMO</div>
           </div>
-          <div className="text-xl text-slate-500">Real-time monitoring, alerting and dispatch</div>
+          <div className="text-xl text-slate-500">Monitoring, alerting and SMS dispatch preview (simulated)</div>
         </div>
         <div className="text-xs px-4 py-1.5 bg-emerald-100 text-emerald-700 rounded-3xl font-medium flex items-center gap-1.5">
           <div className="status-dot online"></div> 12,983 active sessions

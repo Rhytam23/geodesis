@@ -23,10 +23,10 @@ export default function MissionControl() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
         <div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <div className="px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full whitespace-nowrap">LIVE • {today}</div>
+            <div className="px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full whitespace-nowrap">DEMO • {today}</div>
             <div className="font-semibold tracking-tighter text-3xl sm:text-5xl">Mission Control</div>
           </div>
-          <div className="text-lg text-slate-500 mt-1">Real-time satellite data ingestion &amp; decision pipeline</div>
+          <div className="text-lg text-slate-500 mt-1">Simulated satellite-style ingestion &amp; decision pipeline (demonstration data)</div>
         </div>
         <Link to="/live-ops" className="flex items-center gap-2 text-sm px-5 py-2 border border-slate-300 rounded-3xl hover:bg-white transition">
           Open Live Operations <ArrowRight className="w-3.5 h-3.5" />
@@ -38,9 +38,9 @@ export default function MissionControl() {
         <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <div className="font-semibold">Live Operations Status</div>
+              <div className="font-semibold">Operations status (simulated)</div>
               <div className="text-xs text-emerald-600 font-medium flex items-center gap-1.5 mt-1">
-                <div className="status-dot online" /> ALL SYSTEMS NOMINAL
+                <div className="status-dot online" /> SIMULATED STATUS
               </div>
             </div>
             <div className="text-right">
@@ -71,8 +71,8 @@ export default function MissionControl() {
 
           <div className="mt-6 pt-5 border-t text-xs flex flex-wrap gap-x-6 text-slate-500">
             <div><span className="font-medium text-slate-800">6</span> Data Sources</div>
-            <div><span className="font-medium text-slate-800">98.3%</span> Data Validity</div>
-            <div><span className="font-medium text-slate-800">42s</span> Latency</div>
+            <div><span className="font-medium text-slate-800">98.3%</span> Data validity (demo)</div>
+            <div><span className="font-medium text-slate-800">42s</span> Latency (demo)</div>
           </div>
         </div>
 
@@ -92,7 +92,7 @@ export default function MissionControl() {
             </div>
             <div className="mt-auto">
               <div className="font-semibold text-xl tracking-tighterer">Interactive GIS Map</div>
-              <div className="text-sm text-slate-500">Real-time layers, timeline, province boundaries</div>
+              <div className="text-sm text-slate-500">Interactive layers, timeline, province boundaries</div>
             </div>
           </Link>
 

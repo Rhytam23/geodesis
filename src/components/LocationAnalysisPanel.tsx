@@ -234,8 +234,8 @@ export default function LocationAnalysisPanel({ analysis, recommendations, onApp
 
       {/* Footer bar */}
       <div className="border-t px-5 py-3 text-[10px] bg-white flex items-center justify-between text-emerald-700">
-        <div className="flex items-center gap-1.5"><Leaf className="w-3 h-3" /> Data from Sentinel-2, CHIRPS, MONRE, MODIS</div>
-        <div>Updated 8 min ago</div>
+        <div className="flex items-center gap-1.5"><Leaf className="w-3 h-3" /> Weather: Open-Meteo • Soil: SoilGrids • Satellite-style layers: simulated</div>
+        <div>Demonstration data</div>
       </div>
     </div>
   );

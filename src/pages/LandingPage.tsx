@@ -11,7 +11,7 @@ export default function LandingPage() {
   ];
 
   const features = [
-    { icon: Satellite, title: "Multi-Satellite Fusion", desc: "Sentinel-1/2, MODIS, CHIRPS, MONRE ground truth fused in real time." },
+    { icon: Satellite, title: "Layered Climate Data", desc: "Live weather and soil from Open-Meteo and SoilGrids, plus simulated satellite-style layers (NDVI, salinity, rainfall) for the demo." },
     { icon: Zap, title: "Explainable AI", desc: "Every recommendation includes confidence, reasoning and supporting datasets." },
     { icon: Users, title: "Role-Specific Dashboards", desc: "Tailored for farmers, cooperatives, government agencies and researchers." },
     { icon: TrendingUp, title: "Economic Impact Engine", desc: "Yield, income, water savings and cost-benefit analysis in every decision." },
@@ -115,7 +115,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {[
-              'Satellite Data', 'Validation', 'ML Prediction', 
+              'Data Inputs', 'Validation', 'Rule-Based Scoring', 
               'Decision Intelligence', 'SMS Alerts'
             ].map((step, idx) => (
               <div key={idx} className="flex items-center gap-3 bg-slate-50 border border-slate-200 px-5 py-4 rounded-2xl">

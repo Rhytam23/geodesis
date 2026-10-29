@@ -192,7 +192,7 @@ function calculateHistoricalInfluence(crop: string, input: DecisionInput): Influ
 
   if ((crop.includes('Rice') || crop.includes('Shrimp')) && salinity > 4) {
     score = 88;
-    explanation = 'Validated against 2016 & 2020 salinity crisis yield data — strong resilience';
+    explanation = 'Heuristic rule for salinity-crisis conditions like 2016 and 2020 (not validated against yield data)';
   }
   if (crop.includes('Vegetable')) {
     score = 72;
