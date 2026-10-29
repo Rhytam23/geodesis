@@ -460,3 +460,36 @@ describe('api/advisor scenario mode', () => {
     expect(JSON.stringify(sent.messages)).toContain('Moderate Drought');
   });
 });
+
+describe('api/advisor scenario disclaimer', () => {
+  it('appends a simulated-data note when the model omits it', async () => {
+    process.env.NEBIUS_API_KEY = 'mock-nebius-key';
+    const noDisclaimer = [
+      'Scenario outcome: Yield declines from 3.9 to 3.4 t/ha by 2032 while risk rises.',
+      'Why: Lower rainfall and higher salinity plausibly drive the decline.',
+      'Main risk: The risk score climbs from 42 to 60 over the period.',
+      'Next step: Consult a qualified local agricultural extension officer before changing practices.',
+    ].join('\n');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ choices: [{ message: { content: noDisclaimer } }] }),
+    }));
+    const res = createMockRes();
+    await handler(createMockReq({ body: scenarioBody } as Partial<VercelRequest>), res as unknown as VercelResponse);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.advice).toContain('simulated projections on demonstration data');
+  });
+
+  it('does not duplicate the note when the model already says it is simulated', async () => {
+    process.env.NEBIUS_API_KEY = 'mock-nebius-key';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ choices: [{ message: { content: validScenarioAdvice } }] }),
+    }));
+    const res = createMockRes();
+    await handler(createMockReq({ body: scenarioBody } as Partial<VercelRequest>), res as unknown as VercelResponse);
+    expect(res.body.advice).not.toContain('Note: these are simulated projections');
+  });
+});

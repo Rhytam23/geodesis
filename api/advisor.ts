@@ -556,8 +556,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
+  // The prompt asks the model to say the figures are simulated; guarantee it regardless of model behaviour.
+  let advice = validation.cleanText;
+  if (payload.mode === 'scenario' && !/simulat/i.test(advice)) {
+    advice += '\nNote: these are simulated projections on demonstration data, not measurements.';
+  }
+
   return res.status(200).json({
-    advice: validation.cleanText,
+    advice,
     model: config.model,
     provider: config.name,
   });
