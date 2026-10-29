@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import handler, {
   buildPlanMessages,
+  clip,
   buildReasonMessages,
   extractJson,
   fallbackQueries,
@@ -384,6 +385,21 @@ describe('verifyAnswer', () => {
     const already = { ...structuredClone(goodAnswer), limits: 'Simulated inputs; this is outside the delta and not calibrated.' };
     expect(verifyAnswer(already, { ...ctx, outsideDelta: true }).fixes.join(' ')).not.toMatch(/out-of-scope note/);
     expect(verifyAnswer(goodAnswer, ctx).answer!.limits).not.toMatch(/outside the Mekong Delta/);
+  });
+
+  it('shortens over-long text at a word boundary instead of mid-word, and says so', () => {
+    expect(clip('short text', 50)).toBe('short text');
+    const long = 'Current salinity is rising and the simulated recommendation favours standard rice with stable yield outlook';
+    const out = clip(long, 60);
+    expect(out.length).toBeLessThanOrEqual(60);
+    expect(out.endsWith('…')).toBe(true);
+    expect(long.startsWith(out.slice(0, -1))).toBe(true);
+    expect(long[out.length - 1]).toBe(' ');
+    const raw = { ...structuredClone(goodAnswer), headline: long.repeat(3) };
+    const v = verifyAnswer(raw, ctx);
+    expect(v.answer!.headline.length).toBeLessThanOrEqual(220);
+    expect(v.answer!.headline.endsWith('…')).toBe(true);
+    expect(v.fixes.join(' ')).toMatch(/shortened text/);
   });
 
   it('strips URLs the model wrote itself', () => {

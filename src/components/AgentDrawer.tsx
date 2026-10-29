@@ -298,7 +298,7 @@ export default function AgentDrawer({ context, onClose }: AgentDrawerProps) {
 
   const { scenario } = context;
   return (
-    <div className="fixed inset-0 z-[2000]">
+    <div className="fixed inset-0 z-[10000]">
       <div className="absolute inset-0 bg-slate-900/30" onClick={close} aria-hidden />
       <motion.aside
         role="dialog"

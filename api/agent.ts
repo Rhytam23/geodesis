@@ -709,6 +709,14 @@ function normalizeCites(raw: unknown, sourceCount: number, fixes: string[]): num
   return out.slice(0, 3);
 }
 
+/** Cuts at a word boundary and marks the cut, instead of ending mid-word. */
+export function clip(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 1);
+  const space = cut.lastIndexOf(' ');
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,;:.-]+$/, '')}…`;
+}
+
 function stripUrls(text: string, fixes: string[]): string {
   if (!/https?:\/\//i.test(text)) return text;
   fixes.push('removed a URL written by the model');
@@ -733,16 +741,20 @@ export function verifyAnswer(
   const fixes: string[] = [];
   if (!isObj(raw)) return { ok: false, issues: ['reply was not a JSON object'], fixes };
 
-  const text = (v: unknown, max: number) => stripUrls(cleanText(v, max), fixes);
+  const text = (v: unknown, max: number) => {
+    const full = cleanText(v, 2000);
+    if (full.length > max) fixes.push('shortened text that exceeded its length limit');
+    return stripUrls(clip(full, max), fixes);
+  };
 
-  const headline = text(raw.headline, 160);
+  const headline = text(raw.headline, 220);
   if (!headline) issues.push('missing headline');
 
   const rawActions = Array.isArray(raw.actions) ? raw.actions.filter(isObj) : [];
   const actions: AgentAction[] = [];
   for (const a of rawActions.slice(0, 5)) {
-    const step = text(a.step, 200);
-    const why = text(a.why, 240);
+    const step = text(a.step, 240);
+    const why = text(a.why, 300);
     if (!step || !why) continue;
     const cites = normalizeCites(a.cites, ctx.sourceCount, fixes);
     let basis: AnswerBasis = BASES.includes(String(a.basis).toLowerCase() as AnswerBasis) ? (String(a.basis).toLowerCase() as AnswerBasis) : 'assumption';
@@ -763,14 +775,14 @@ export function verifyAnswer(
   const rawRisks = Array.isArray(raw.risks) ? raw.risks.filter(isObj) : [];
   const risks: AgentRisk[] = [];
   for (const r of rawRisks.slice(0, 3)) {
-    const risk = text(r.risk, 180);
-    const mitigation = text(r.mitigation, 200);
+    const risk = text(r.risk, 220);
+    const mitigation = text(r.mitigation, 260);
     if (!risk || !mitigation) continue;
     risks.push({ risk, mitigation, cites: normalizeCites(r.cites, ctx.sourceCount, fixes) });
   }
   if (risks.length < 1) issues.push('no usable risks');
 
-  let limits = text(raw.limits, 280);
+  let limits = text(raw.limits, 420);
   if (!limits) issues.push('missing limits');
 
   const everything = [headline, limits, ...actions.flatMap((a) => [a.step, a.why]), ...risks.flatMap((r) => [r.risk, r.mitigation])].join('\n');
