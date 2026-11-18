@@ -1,15 +1,71 @@
-# Geodesis
+<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<a id="readme-top"></a>
+
+<!-- PROJECT SHIELDS -->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![License][license-shield]][license-url]
+[![CI](https://github.com/Rhytam23/geodesis/actions/workflows/ci.yml/badge.svg)](https://github.com/Rhytam23/geodesis/actions/workflows/ci.yml)
+
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/Rhytam23/geodesis">
+    <img src="public/favicon.svg" alt="Logo" width="80" height="80">
+  </a>
+
+<h3 align="center">Geodesis</h3>
+
+  <p align="center">
+    Geospatial digital twin and research agent for climate-resilient rice farming in the Vietnamese Mekong Delta.
+    <br />
+    <a href="https://github.com/Rhytam23/geodesis"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://geodesis.vercel.app/workspace">View Demo</a>
+    &middot;
+    <a href="https://github.com/Rhytam23/geodesis/issues/new?labels=bug">Report Bug</a>
+    &middot;
+    <a href="https://github.com/Rhytam23/geodesis/issues/new?labels=enhancement">Request Feature</a>
+  </p>
+</div>
+
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li><a href="#getting-started">Getting Started</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
+
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
 Geospatial digital twin and research agent for climate-resilient rice farming in the Vietnamese Mekong Delta.
 
-[![CI](https://github.com/Rhytam23/geodesis/actions/workflows/ci.yml/badge.svg)](https://github.com/Rhytam23/geodesis/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
 **Live demo:** <https://geodesis.vercel.app/workspace> (no sign-in) · Built for the **Nebius x NVIDIA Global AI Hackathon**, track *Best Apps and Agents*.
 
 Pick a province, move the climate timeline, run a what-if scenario, then ask the **Geodesis Agent** what to do. It plans its research, pulls a live forecast and web evidence, reasons with NVIDIA Nemotron on Nebius Token Factory, and verifies that every citation is real before showing you the answer.
 
-## How it uses Nebius Token Factory, NVIDIA Nemotron and Tavily
+### How it uses Nebius Token Factory, NVIDIA Nemotron and Tavily
+
 
 | Step | Who does it | What happens |
 |------|-------------|--------------|
@@ -38,7 +94,8 @@ flowchart LR
 
 **What the agent will not do.** It never changes the simulation or the rule-based recommendation. Its sources are treated as untrusted text (the prompt says to extract facts only, and every URL shown comes from Tavily, never from the model). If no source supports a claim it is labelled `assumption`, and with no Tavily key the search step is skipped and nothing is labelled as web evidence.
 
-## What was built during the hackathon
+### What was built during the hackathon
+
 
 The Submission Period began on 2026-08-26. The repository's first commit is 2026-07-08, so this project existed before the hackathon. What was added during the Submission Period (21 commits, about 7,100 lines added and 3,200 removed across 36 files up to 2026-10-29, plus the agent work after that):
 
@@ -51,7 +108,8 @@ The Submission Period began on 2026-08-26. The repository's first commit is 2026
 
 Before the Submission Period (2026-07-08 to 2026-07-21): the map, rule-based decision engine, economic model, role dashboards and demo mode.
 
-## Features
+### Features
+
 
 | Feature | Description |
 |---------|-------------|
@@ -65,53 +123,15 @@ Before the Submission Period (2026-07-08 to 2026-07-21): the map, rule-based dec
 | Role dashboards | Farmer, cooperative, government and researcher views |
 | Demo mode | Five deterministic scenarios: normal, flood, drought, high salinity, government response |
 
-## Try it
+### Try it
+
 
 1. Open <https://geodesis.vercel.app/workspace>.
 2. Click a province under *Quick regions*, then **Run Simulation**.
 3. Click **Ask the agent** in the right panel and press **Run agent**.
 
-## Quick start (local)
+### What is real and what is simulated
 
-```bash
-git clone https://github.com/Rhytam23/geodesis.git
-cd geodesis
-npm install
-npm run dev
-```
-
-Open <http://localhost:3000/workspace>. Everything except the AI features works without keys; live data sources fall back to labelled demonstration data if unreachable.
-
-To run the agent locally, copy `.env.example` to `.env.local`, add your keys, and restart `npm run dev`. The dev server serves the `api/*.ts` functions itself, so `vercel dev` is not needed.
-
-## Scripts
-
-```bash
-npm run dev         # dev server (also serves api/*.ts)
-npm run build       # production build
-npm run typecheck   # TypeScript check
-npm run lint        # ESLint
-npm run format      # Prettier
-npm test            # Vitest (86 tests)
-npm run ci          # typecheck + lint + test + build
-node scripts/eval-agent.mjs https://geodesis.vercel.app   # live evaluation of the agent
-```
-
-## Environment variables
-
-`.env.local` is git-ignored; never commit keys. Do not prefix these with `VITE_`, which would expose them in the browser. On Vercel, add them under Project Settings, Environment Variables, then redeploy.
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEBIUS_API_KEY` | for AI features | Nebius Token Factory API key |
-| `TAVILY_API_KEY` | optional | Enables web evidence in the agent. Without it the search step is skipped |
-| `NEBIUS_MODEL_FAST` | optional | Planner and fallback model (default `nvidia/Nemotron-3_5-Lightning`) |
-| `NEBIUS_MODEL_DEEP` | optional | Reasoning model (default: largest Nemotron Ultra or Super found in `GET /v1/models`) |
-| `NEBIUS_BASE_URL` | optional | OpenAI-compatible base URL (default `https://api.tokenfactory.nebius.com/v1`) |
-
-The older advisor (`api/advisor.ts`) also accepts `NEBIUS_MODEL` and an optional `NVIDIA_API_KEY` fallback.
-
-## What is real and what is simulated
 
 Geodesis is a demonstration platform and says so in the UI.
 
@@ -123,7 +143,8 @@ Geodesis is a demonstration platform and says so in the UI.
 | Satellite-style layers (NDVI, salinity heatmaps) | **Simulated** and labelled |
 | Decision engine | Rule-based weighted scoring; no trained ML model; not validated against field or yield data |
 
-## Limitations and known failure cases
+### Limitations and known failure cases
+
 
 Published on purpose; none of this is hidden in the demo.
 
@@ -135,7 +156,8 @@ Published on purpose; none of this is hidden in the demo.
 - **Language.** Answers can be requested in Vietnamese, but interface labels are English, and Vietnamese output has not been reviewed by a native speaker.
 - **Best-effort rate limit.** The per-IP limit is per serverless instance; use a platform firewall for hard limits.
 
-## Evaluation
+### Evaluation
+
 
 `scripts/eval-agent.mjs` runs eight fixed cases against a deployment (three provinces, a freshwater upstream case, a Vietnamese run, a flood scenario, an out-of-scope location and a prompt-injection attempt) and reports success, latency, models used, sources, citation validity, repairs and fallbacks. Run it yourself:
 
@@ -147,7 +169,8 @@ Run against production on 2026-10-29 with web search on (after a fix, see below)
 
 The first run with web search on was worse: 7 of 8 completed, 3 repair passes, and two outliers of 66 s and 71 s. With sources the prompt is longer and the large model sometimes hit the 2,200-token output cap and returned truncated JSON; the cap was raised to 3,500 and the timeouts shortened. Before web search was enabled the same cases took a median of about 6.5 s. Eight runs is a small sample, so treat these figures as indicative.
 
-## Architecture
+### Architecture
+
 
 ```
 workspace state (location, year, scenario, simulation)
@@ -162,7 +185,8 @@ workspace state (location, year, scenario, simulation)
 
 The map, decision engine and dashboards use `useLocationData` (weather, soil, admin, market, crop in parallel) feeding `decisionEngine`, `economicService` and the UI panels. All twin values flow through `useGeodesisTwin`.
 
-## Project structure
+### Project structure
+
 
 ```
 src/
@@ -179,11 +203,13 @@ tests/          Vitest tests
 docs/           architecture, developer guide, deployment
 ```
 
-## Tech stack
+### Tech stack
+
 
 React 18, TypeScript 5, Vite 5, Leaflet, Recharts, Tailwind CSS, Framer Motion, React Router 6, Vitest, Vercel Functions, Nebius Token Factory, NVIDIA Nemotron, Tavily, Open-Meteo.
 
-## Data sources
+### Data sources
+
 
 | Service | Purpose | Key |
 |---------|---------|-----|
@@ -193,7 +219,8 @@ React 18, TypeScript 5, Vite 5, Leaflet, Recharts, Tailwind CSS, Framer Motion, 
 | [ISRIC SoilGrids](https://rest.isric.org) | Soil properties | none |
 | [OpenStreetMap Nominatim](https://nominatim.org) | Reverse geocoding (1 req/sec) | none |
 
-## Deployment
+### Deployment
+
 
 ```bash
 vercel                      # Vercel CLI
@@ -203,7 +230,8 @@ npm run build               # static output in dist/
 
 See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 
-## Documentation
+### Documentation
+
 
 - [Architecture](./docs/ARCHITECTURE.md)
 - [Developer guide](./docs/DEVELOPER_GUIDE.md)
@@ -211,10 +239,121 @@ See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 - [Roadmap](./ROADMAP.md)
 - [OpenAPI spec](./api/openapi.yaml)
 
-## Contributing and security
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+### Built With
+
+* [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
+* [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+* [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+* [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+* [![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com/)
+* [![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+* [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+### Quick start (local)
+
+
+```bash
+git clone https://github.com/Rhytam23/geodesis.git
+cd geodesis
+npm install
+npm run dev
+```
+
+Open <http://localhost:3000/workspace>. Everything except the AI features works without keys; live data sources fall back to labelled demonstration data if unreachable.
+
+To run the agent locally, copy `.env.example` to `.env.local`, add your keys, and restart `npm run dev`. The dev server serves the `api/*.ts` functions itself, so `vercel dev` is not needed.
+
+### Environment variables
+
+
+`.env.local` is git-ignored; never commit keys. Do not prefix these with `VITE_`, which would expose them in the browser. On Vercel, add them under Project Settings, Environment Variables, then redeploy.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEBIUS_API_KEY` | for AI features | Nebius Token Factory API key |
+| `TAVILY_API_KEY` | optional | Enables web evidence in the agent. Without it the search step is skipped |
+| `NEBIUS_MODEL_FAST` | optional | Planner and fallback model (default `nvidia/Nemotron-3_5-Lightning`) |
+| `NEBIUS_MODEL_DEEP` | optional | Reasoning model (default: largest Nemotron Ultra or Super found in `GET /v1/models`) |
+| `NEBIUS_BASE_URL` | optional | OpenAI-compatible base URL (default `https://api.tokenfactory.nebius.com/v1`) |
+
+The older advisor (`api/advisor.ts`) also accepts `NEBIUS_MODEL` and an optional `NVIDIA_API_KEY` fallback.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- USAGE EXAMPLES -->
+## Usage
+
+### Scripts
+
+
+```bash
+npm run dev         # dev server (also serves api/*.ts)
+npm run build       # production build
+npm run typecheck   # TypeScript check
+npm run lint        # ESLint
+npm run format      # Prettier
+npm test            # Vitest (86 tests)
+npm run ci          # typecheck + lint + test + build
+node scripts/eval-agent.mjs https://geodesis.vercel.app   # live evaluation of the agent
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- ROADMAP -->
+## Roadmap
+
+See the [open issues](https://github.com/Rhytam23/geodesis/issues) for a full list of proposed features (and known issues).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- CONTRIBUTING -->
+## Contributing
+
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md). Report vulnerabilities as described in [SECURITY.md](./SECURITY.md).
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- LICENSE -->
 ## License
 
+
 [MIT](./LICENSE)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- CONTACT -->
+## Contact
+
+Rhytam Biswas - [@Rhytam23](https://github.com/Rhytam23)
+
+Project Link: [https://github.com/Rhytam23/geodesis](https://github.com/Rhytam23/geodesis)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[contributors-shield]: https://img.shields.io/github/contributors/Rhytam23/geodesis.svg?style=for-the-badge
+[contributors-url]: https://github.com/Rhytam23/geodesis/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Rhytam23/geodesis.svg?style=for-the-badge
+[forks-url]: https://github.com/Rhytam23/geodesis/network/members
+[stars-shield]: https://img.shields.io/github/stars/Rhytam23/geodesis.svg?style=for-the-badge
+[stars-url]: https://github.com/Rhytam23/geodesis/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Rhytam23/geodesis.svg?style=for-the-badge
+[issues-url]: https://github.com/Rhytam23/geodesis/issues
+[license-shield]: https://img.shields.io/github/license/Rhytam23/geodesis.svg?style=for-the-badge
+[license-url]: https://github.com/Rhytam23/geodesis/blob/main/LICENSE
